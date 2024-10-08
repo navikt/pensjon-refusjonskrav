@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 group = "no.nav.pensjon.refusjonskrav"
-version = "1"
+//version = "1"
 description = "pensjon-refusjonskrav"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
