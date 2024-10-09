@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 group = "no.nav.pensjon.refusjonskrav"
-//version = "1"
 description = "pensjon-refusjonskrav"
-java.sourceCompatibility = JavaVersion.VERSION_21
+
 
 val logstashEncoderVersion = "8.0"
 val springkafkaVersion= "3.2.3"
@@ -40,6 +39,7 @@ dependencies {
     implementation("no.nav", "vault-jdbc" ,"1.3.10")
     implementation("no.nav.pensjonsamhandling", "maskinporten-validation-spring", "2.0.3")
     implementation("net.logstash.logback", "logstash-logback-encoder", logstashEncoderVersion)
+    implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
     //implementation("org.postgresql", "postgresql", "42.6.0")
     //implementation("org.hibernate.validator", "hibernate-validator", "8.0.1.Final")
     implementation("org.springframework.boot", "spring-boot-starter-web")
