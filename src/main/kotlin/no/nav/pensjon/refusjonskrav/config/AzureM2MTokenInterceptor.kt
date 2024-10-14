@@ -14,7 +14,7 @@ class AzureM2MTokenInterceptor(
     private val samScope: String
     ): ClientHttpRequestInterceptor {
 
-    val tokenCLient =  AzureAdTokenClientBuilder.builder().withNaisDefaults().buildMachineToMachineTokenClient()
+    private val tokenCLient =  AzureAdTokenClientBuilder.builder().withNaisDefaults().buildMachineToMachineTokenClient()
 
     override fun intercept(
         request: HttpRequest,
