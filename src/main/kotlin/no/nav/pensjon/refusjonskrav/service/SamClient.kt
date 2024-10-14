@@ -1,6 +1,8 @@
 package no.nav.pensjon.refusjonskrav.service
 
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClientException
@@ -12,9 +14,12 @@ class SamClient(
     private val samRestTemplate: RestTemplate
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav): Boolean {
         try {
-            val response = samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
+            logger.debug("refusjonkrav: $refusjonskrav")
+            val response = samRestTemplate.postForEntity("/api/refusjonskrav/", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
             return when {
                 !response.refusjonskravAlleredeRegistrertEllerUtenforFrist && response.exception == null && response.exceptionName == null -> true
                 response.refusjonskravAlleredeRegistrertEllerUtenforFrist -> throw ResponseStatusException(HttpStatus.CONFLICT, response.exception?.message)
