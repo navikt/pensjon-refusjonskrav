@@ -1,0 +1,21 @@
+apiVersion: krakend.nais.io/v1
+kind: Krakend
+metadata:
+  name: pensjon-refusjonskrav
+  namespace: pensjonsamhandling
+  labels:
+    team: pensjonsamhandling
+spec:
+  authProviders:
+    - name: maskinporten
+      alg: RS256
+      jwkUrl: "https://test.maskinporten.no/jwk"
+      issuer: "https://test.maskinporten.no/"
+  ingress:
+    className: nais-ingress-external
+    enabled: true
+    hosts:
+      - host: pensjon-gw.ekstern.dev.nav.no
+        paths:
+          - path: /samordning/
+            pathType: ImplementationSpecific

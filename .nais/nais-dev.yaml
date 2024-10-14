@@ -1,0 +1,55 @@
+apiVersion: "nais.io/v1"
+kind: "Application"
+metadata:
+  name: pensjon-refusjonskrav
+  namespace: pensjonsamhandling
+  labels:
+    team: pensjonsamhandling
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://pensjon-refusjonskrav.intern.dev.nav.no
+    - https://pensjon-refusjonskrav.dev-fss-pub.nais.io
+  webproxy: true
+  maskinporten:
+    enabled: true
+  liveness:
+    path: actuator/health/liveness
+    initialDelay: 45
+    periodSeconds: 1
+    failureThreshold: 60
+  readiness:
+    path: actuator/health/readiness
+    initialDelay: 45
+    periodSeconds: 1
+    failureThreshold: 60
+  vault:
+    enabled: true
+  replicas:
+    min: 2
+    max: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+  prometheus:
+    enabled: true
+    path: actuator/prometheus
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: LOGGING_CONFIG
+      value: classpath:logback-json.xml
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: deployment.environment.name=q2
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: grafana-lgtm
+        - id: elastic-apm

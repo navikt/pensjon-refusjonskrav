@@ -1,0 +1,28 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: pensjon-refusjonskrav
+  namespace: pensjonsamhandling
+  labels:
+    team: pensjonsamhandling
+spec:
+  krakend: pensjon-refusjonskrav
+  auth:
+    name: maskinporten
+    cache: true
+    scopes:
+      - nav:pensjon/v1/refusjonskrav
+  rateLimit:
+    maxRate: 100
+    every: 60s
+  endpoints:
+    - path: /api/refusjonskrav
+      method: POST
+      timeout: 60s
+      forwardHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-Id
+      backendHost: https://pensjon-refusjonskrav.dev-fss-pub.nais.io
+      backendPath: /api/refusjonskrav
+---
