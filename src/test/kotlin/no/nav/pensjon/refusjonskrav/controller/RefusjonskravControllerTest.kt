@@ -1,6 +1,8 @@
 package no.nav.pensjon.refusjonskrav.controller
 
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import no.nav.pensjon.refusjonskrav.config.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,12 +23,17 @@ class RefusjonskravControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
+    private lateinit var azureM2MTokenInterceptor: AzureM2MTokenInterceptor
+
+    @MockkBean
     private lateinit var samRestTemplate: RestTemplate
 
     @Test
     fun `valid request respons is 200 OK`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
+        every {
 
+        }
         mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = request
