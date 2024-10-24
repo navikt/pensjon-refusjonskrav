@@ -12,8 +12,64 @@ spec:
     - https://pensjon-refusjonskrav.intern.dev.nav.no
     - https://pensjon-refusjonskrav.dev-fss-pub.nais.io
   webproxy: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-vedtaksvurdering
+          namespace: etterlatte
+          cluster: dev-gcp
+        - application: pensjon-pen-q2
+          namespace: pensjon-q2
+          cluster: dev-fss
+        - application: pensjon-psak-q2
+          namespace: pensjon-q2
+          cluster: dev-fss
+        - application: pensjon-elsam-minibuss-q2
+          namespace: pensjonsamhandling
+          cluster: dev-fss
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: sam-q2
+          namespace: pensjonsamhandling
+          cluster: dev-fss
   maskinporten:
     enabled: true
+    scopes:
+      exposes:
+        - name: refusjonskrav
+          product: pensjon
+          enabled: true
+          delegationSource: altinn
+          consumers:
+            - name: SPK
+              orgnr: 982583462
+            - name: KLP
+              orgnr: 938708606
+            - name: GABLER PENSJONSTJENESTER AS
+              orgnr: 916833520
+            - name: OSLO PENSJONSFORSIKRING AS
+              orgnr: 982759412
+            - name: Storebrand Livsforsikring AS
+              orgnr: 958995369
+            - name: Storebrand Pensjonstjenester AS
+              orgnr: 931936492
+            - name: Viken
+              orgnr: 974371359
+            - name: Arendal kommunale pensjonskasse
+              orgnr: 940380014
+            - name: Drammen kommunale pensjonskasse
+              orgnr: 980650383
+            - name: Pensjonsordningen for apotekvirksomhet
+              orgnr: 940291380
+            - name: NAV
+              orgnr: 889640782
+            - name: Maritim pensjonskasse
+              orgnr: 940415683
+            - name: Garantikassen for fiskere
+              orgnr: 974652382
   liveness:
     path: actuator/health/liveness
     initialDelay: 45
