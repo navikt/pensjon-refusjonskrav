@@ -5,6 +5,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.pensjon.refusjonskrav.config.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.*
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,40 +34,58 @@ class RefusjonskravControllerTest {
     private lateinit var samRestTemplate: RestTemplate
 
     @Test
-    fun `valid request respons is 200 OK`() {
+    fun `valid request response is 201 No Content`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
 
         val requestJson = jacksonObjectMapper().writeValueAsString(request)
 
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
-        every { samRestTemplate.postForEntity("/api/refusjonskrav/", request, OpprettRefusjonskravResponse::class.java)  } returns ResponseEntity<OpprettRefusjonskravResponse>(OpprettRefusjonskravResponse(false), HttpStatus.OK,)
+        every {
+            samRestTemplate.postForEntity(
+                "/api/refusjonskrav/",
+                request,
+                OpprettRefusjonskravResponse::class.java
+            )
+        } returns ResponseEntity<OpprettRefusjonskravResponse>(OpprettRefusjonskravResponse(), HttpStatus.OK)
 
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
-        }.andDo { print() } .andExpect {
+        }.andDo { print() }.andExpect {
             status {
-                isOk()
+                isNoContent()
             }
-            content { contentType(MediaType.APPLICATION_JSON) }
         }
     }
 
     @Test
-    fun `refusjonskrav allerede registrert gir http status conflict`() {
+    fun `ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST response is 409 Conflict`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
 
         val requestJson = jacksonObjectMapper().writeValueAsString(request)
 
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
-        every { samRestTemplate.postForEntity("/api/refusjonskrav/", request, OpprettRefusjonskravResponse::class.java)  } returns
-                ResponseEntity<OpprettRefusjonskravResponse>(OpprettRefusjonskravResponse(true, Exception("Message with id = ${request.samId} has already been answered or time limit is exceeded."), "SamAlreadyAnsweredOrTimeLimitExceededException"), HttpStatus.OK)
+        every {
+            samRestTemplate.postForEntity(
+                "/api/refusjonskrav/",
+                request,
+                OpprettRefusjonskravResponse::class.java
+            )
+        } returns
+                ResponseEntity<OpprettRefusjonskravResponse>(
+                    OpprettRefusjonskravResponse(
+                        "Message with id = ${request.samId} has already been answered or time limit is exceeded.",
+                        ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+                    ),
+                    HttpStatus.OK
+                )
 
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
-        }.andDo { print()
-        } .andExpect {
+        }.andDo {
+            print()
+        }.andExpect {
             status {
                 isConflict()
                 reason("Message with id = 1234 has already been answered or time limit is exceeded.")
@@ -75,42 +94,59 @@ class RefusjonskravControllerTest {
     }
 
     @Test
-    fun `refusjonskrav allerede registrert gir http status internal server error`() {
+    fun `ELEMENT_FINNES_IKKE response is 404 Not Found`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
 
         val requestJson = jacksonObjectMapper().writeValueAsString(request)
 
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
-        every { samRestTemplate.postForEntity("/api/refusjonskrav/", request, OpprettRefusjonskravResponse::class.java)  } returns
-                ResponseEntity<OpprettRefusjonskravResponse>(OpprettRefusjonskravResponse(false, Exception("No tpforhold exist"), "NoTPForholdExistException"), HttpStatus.OK)
+        every {
+            samRestTemplate.postForEntity(
+                "/api/refusjonskrav/",
+                request,
+                OpprettRefusjonskravResponse::class.java
+            )
+        } returns
+                ResponseEntity<OpprettRefusjonskravResponse>(
+                    OpprettRefusjonskravResponse("No tpforhold exist", ELEMENT_FINNES_IKKE),
+                    HttpStatus.OK
+                )
 
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
-        }.andDo { print()
-        } .andExpect {
+        }.andDo {
+            print()
+        }.andExpect {
             status {
-                isInternalServerError()
+                isNotFound()
                 reason("No tpforhold exist")
             }
         }
     }
 
     @Test
-    fun `refusjonskrav unexpected exception mot sam`() {
+    fun `Unexpected exception mot sam is 500 Internal Server Error`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
 
         val requestJson = jacksonObjectMapper().writeValueAsString(request)
 
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
-        every { samRestTemplate.postForEntity("/api/refusjonskrav/", request, OpprettRefusjonskravResponse::class.java)  } throws
+        every {
+            samRestTemplate.postForEntity(
+                "/api/refusjonskrav/",
+                request,
+                OpprettRefusjonskravResponse::class.java
+            )
+        } throws
                 RestClientException("Unexpected exception")
 
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
-        }.andDo { print()
-        } .andExpect {
+        }.andDo {
+            print()
+        }.andExpect {
             status {
                 isInternalServerError()
                 reason("Unexpected exception")

@@ -16,17 +16,15 @@ class SamClient(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav): Boolean {
+    fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav) {
         try {
-            logger.debug("refusjonkrav: $refusjonskrav")
-            val response = samRestTemplate.postForEntity("/api/refusjonskrav/", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
-            return when {
-                !response.refusjonskravAlleredeRegistrertEllerUtenforFrist && response.exception == null && response.exceptionName == null -> true
-                response.refusjonskravAlleredeRegistrertEllerUtenforFrist -> throw ResponseStatusException(HttpStatus.CONFLICT, response.exception?.message)
-                else -> {
-                    throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, response.exception?.message)
-                }
-            }
+            logger.debug("refusjonkrav: {}", refusjonskrav)
+            val response = samRestTemplate.postForEntity(
+                "/api/refusjonskrav/",
+                refusjonskrav,
+                OpprettRefusjonskravResponse::class.java
+            ).body!!
+            response.exceptionType?.throwResponseStatusException(response.message)
         } catch (e: RestClientException) {
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
