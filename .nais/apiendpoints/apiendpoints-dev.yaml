@@ -11,7 +11,7 @@ spec:
     name: maskinporten
     cache: true
     scopes:
-      - nav:pensjon/v1/refusjonskrav
+      - nav:pensjon/refusjonskrav
   rateLimit:
     maxRate: 100
     every: 60s
