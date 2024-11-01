@@ -18,14 +18,16 @@ class SamClient(
 
     fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav) {
         try {
-            logger.debug("refusjonkrav: {}", refusjonskrav)
             val response = samRestTemplate.postForEntity(
                 "/api/refusjonskrav/",
                 refusjonskrav,
                 OpprettRefusjonskravResponse::class.java
-            ).body!!
+            ).body!!.also {
+                logger.info("opprettet refusjonskrav ok")
+            }
             response.exceptionType?.throwResponseStatusException(response.message)
         } catch (e: RestClientException) {
+            logger.error(e.message, e)
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
     }

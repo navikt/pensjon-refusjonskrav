@@ -1,5 +1,7 @@
 package no.nav.pensjon.refusjonskrav.config
 
+import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
+import no.nav.pensjon.refusjonskrav.service.interceptor.RestTemplateMdcInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -10,9 +12,15 @@ import org.springframework.web.client.RestTemplate
 class RestConfig(
     @Value("\${sam.url}")
     private val samUrl: String,
-    private val azureM2MTokenInterceptor: AzureM2MTokenInterceptor
+    private val azureM2MTokenInterceptor: AzureM2MTokenInterceptor,
+    private val restTemplateMdcInterceptor: RestTemplateMdcInterceptor
 ) {
 
     @Bean
-    fun samRestTemplate(): RestTemplate = RestTemplateBuilder().rootUri(samUrl).additionalInterceptors(azureM2MTokenInterceptor).build()
+    fun samRestTemplate(): RestTemplate = RestTemplateBuilder()
+        .rootUri(samUrl)
+        .additionalInterceptors(
+            azureM2MTokenInterceptor,
+            restTemplateMdcInterceptor)
+        .build()
 }

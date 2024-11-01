@@ -10,6 +10,8 @@ val jakartaAnnotationApiVersion = "3.0.0"
 val jakartaInjectApiVersion = "2.0.1.MR"
 val junitplatformVersion = "1.11.0"
 val mockkVersion = "1.13.12"
+val mockOAuth2ServerVersion = "2.1.10"
+val tokensupportVersion = "5.0.2"
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -63,6 +65,8 @@ dependencies {
     testImplementation("org.mock-server", "mockserver-spring-test-listener-no-dependencies", "5.15.0")
     //testImplementation("org.junit.platform:junit-platform-suite-api:$junitplatformVersion")
     testImplementation("no.nav.pensjonsamhandling", "maskinporten-validation-spring-test", "2.0.3")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    testImplementation("no.nav.security:token-validation-spring-test:$tokensupportVersion")
 
 }
 

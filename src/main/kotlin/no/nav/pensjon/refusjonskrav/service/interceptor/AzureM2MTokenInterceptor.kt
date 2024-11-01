@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.config
+package no.nav.pensjon.refusjonskrav.service.interceptor
 
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder
 import org.springframework.beans.factory.annotation.Value
@@ -6,9 +6,9 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class AzureM2MTokenInterceptor(
     @Value("\${sam.scope}")
     private val samScope: String

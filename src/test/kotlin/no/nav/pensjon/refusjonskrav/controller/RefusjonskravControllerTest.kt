@@ -1,17 +1,22 @@
 package no.nav.pensjon.refusjonskrav.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nimbusds.jose.JOSEObjectType
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.pensjon.refusjonskrav.config.AzureM2MTokenInterceptor
+import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.*
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -20,12 +25,16 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
+@EnableMockOAuth2Server
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RefusjonskravControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Autowired
+    protected lateinit var server: MockOAuth2Server
 
     @MockkBean
     private lateinit var azureM2MTokenInterceptor: AzureM2MTokenInterceptor
@@ -142,6 +151,7 @@ class RefusjonskravControllerTest {
                 RestClientException("Unexpected exception")
 
         mockMvc.post("/api/refusjonskrav/") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer ${mockEntraIdToken("test")}")
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
         }.andDo {
@@ -152,5 +162,25 @@ class RefusjonskravControllerTest {
                 reason("Unexpected exception")
             }
         }
+    }
+
+    fun mockEntraIdToken(subject: String): String = token(
+        "entraID",
+        subject.hashCode().toString(),
+        "refusjonskrav-test",
+        mapOf("pid" to subject)
+    )
+
+    private fun token(
+        issuerId: String,
+        subject: String,
+        audience: String,
+        claims: Map<String, Any>): String {
+
+        return server.issueToken(
+            issuerId, "theclientid", DefaultOAuth2TokenCallback(
+                issuerId, subject, JOSEObjectType.JWT.type, listOf(audience), claims, 3600
+            )
+        ).serialize()
     }
 }
