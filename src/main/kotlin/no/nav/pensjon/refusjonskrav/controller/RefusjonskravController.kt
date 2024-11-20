@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequiredIssuers(
-    ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon:refusjonskrav"]),
+    ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon/refusjonskrav"]),
     ProtectedWithClaims(issuer = "entraID")
 )
 class RefusjonskravController(private val samClient: SamClient) {

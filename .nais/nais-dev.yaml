@@ -41,6 +41,7 @@ spec:
       exposes:
         - name: refusjonskrav
           product: pensjon
+          separator: /
           enabled: true
           delegationSource: altinn
           consumers:
