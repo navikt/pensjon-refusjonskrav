@@ -1,22 +1,19 @@
 package no.nav.pensjon.refusjonskrav.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.nimbusds.jose.JOSEObjectType
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.*
+import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ELEMENT_FINNES_IKKE
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
+import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
-import java.util.UUID
+import java.util.*
 
 @EnableMockOAuth2Server
 @AutoConfigureMockMvc
@@ -61,6 +58,9 @@ class RefusjonskravControllerTest {
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            headers {
+                setBearerAuth(mockEntraIdToken())
+            }
         }.andDo { print() }.andExpect {
             status {
                 isNoContent()
@@ -89,10 +89,12 @@ class RefusjonskravControllerTest {
                     ),
                     HttpStatus.OK
                 )
-        server.issueToken("EntraID", )
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            headers {
+                setBearerAuth(mockEntraIdToken())
+            }
         }.andDo {
             print()
         }.andExpect {
@@ -125,6 +127,9 @@ class RefusjonskravControllerTest {
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            headers {
+                setBearerAuth(mockEntraIdToken())
+            }
         }.andDo {
             print()
         }.andExpect {
@@ -152,9 +157,11 @@ class RefusjonskravControllerTest {
                 RestClientException("Unexpected exception")
 
         mockMvc.post("/api/refusjonskrav/") {
-            header(HttpHeaders.AUTHORIZATION, "Bearer ${mockEntraIdToken()}")
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            headers {
+                setBearerAuth(mockEntraIdToken())
+            }
         }.andDo {
             print()
         }.andExpect {

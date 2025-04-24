@@ -2,5 +2,11 @@ sam:
   url: http://localhost
   scope: sam
 
-AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/endtraID/.well-known/openid-configuration
+AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/entraID/.well-known/openid-configuration
 AZURE_APP_CLIENT_ID: refusjonskrav-test
+
+no.nav.security.jwt:
+  issuer:
+    entraID:
+      discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
+      accepted-audience: ${AZURE_APP_CLIENT_ID}
