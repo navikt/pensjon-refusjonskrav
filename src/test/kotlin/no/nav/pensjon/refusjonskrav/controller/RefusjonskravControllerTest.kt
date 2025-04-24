@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.util.UUID
 
 @EnableMockOAuth2Server
 @AutoConfigureMockMvc
@@ -88,7 +89,7 @@ class RefusjonskravControllerTest {
                     ),
                     HttpStatus.OK
                 )
-
+        server.issueToken("EntraID", )
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
@@ -151,7 +152,7 @@ class RefusjonskravControllerTest {
                 RestClientException("Unexpected exception")
 
         mockMvc.post("/api/refusjonskrav/") {
-            header(HttpHeaders.AUTHORIZATION, "Bearer ${mockEntraIdToken("test")}")
+            header(HttpHeaders.AUTHORIZATION, "Bearer ${mockEntraIdToken()}")
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
         }.andDo {
@@ -164,23 +165,25 @@ class RefusjonskravControllerTest {
         }
     }
 
-    fun mockEntraIdToken(subject: String): String = token(
-        "entraID",
-        subject.hashCode().toString(),
-        "refusjonskrav-test",
-        mapOf("pid" to subject)
+    fun mockEntraIdToken(): String = token(
+        issuerId = "entraID",
+        audience = "refusjonskrav-test",
+        claims = mapOf(
+            "azp_name" to UUID.randomUUID().toString(),
+            "roles" to listOf<String>(),
+            "idtyp" to "app"
+        )
     )
 
     private fun token(
         issuerId: String,
-        subject: String,
         audience: String,
         claims: Map<String, Any>): String {
 
         return server.issueToken(
-            issuerId, "theclientid", DefaultOAuth2TokenCallback(
-                issuerId, subject, JOSEObjectType.JWT.type, listOf(audience), claims, 3600
-            )
+            issuerId = issuerId,
+            audience = audience,
+            claims = claims
         ).serialize()
     }
 }

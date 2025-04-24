@@ -11,7 +11,7 @@ val jakartaInjectApiVersion = "2.0.1.MR"
 val junitplatformVersion = "1.11.0"
 val mockkVersion = "1.13.12"
 val mockOAuth2ServerVersion = "2.1.10"
-val tokensupportVersion = "5.0.2"
+val tokensupportVersion = "5.0.20"
 
 plugins {
     kotlin("jvm") version "2.0.20"
