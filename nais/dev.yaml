@@ -18,6 +18,9 @@ spec:
         - application: sam-q2
           namespace: pensjonsamhandling
           cluster: dev-fss
+  azure:
+    application:
+      enabled: true
   maskinporten:
     enabled: true
     scopes:
