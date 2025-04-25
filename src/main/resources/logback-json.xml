@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeCallerData>true</includeCallerData>
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                <valueMask>
+                    <value>\b(\d{6})\d{5}\b</value>
+                    <mask>$1*****</mask>
+                </valueMask>
+            </jsonGeneratorDecorator>
+        </encoder>
+    </appender>
+
+    <springProfile name="prod">
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="no.nav.security" level="WARN"/>
+    </springProfile>
+
+    <springProfile name="dev">
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="no.nav.pensjon" level="DEBUG"/>
+
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

@@ -64,14 +64,12 @@ spec:
     initialDelay: 45
     periodSeconds: 1
     failureThreshold: 60
-  vault:
-    enabled: true
   replicas:
     min: 2
     max: 2
   resources:
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 512Mi
     requests:
       cpu: 500m
