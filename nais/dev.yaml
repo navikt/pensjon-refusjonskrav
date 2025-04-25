@@ -1,5 +1,5 @@
-apiVersion: "nais.io/v1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
   name: pensjon-refusjonskrav
   namespace: pensjonsamhandling
@@ -13,23 +13,6 @@ spec:
     - https://pensjon-refusjonskrav.dev-fss-pub.nais.io
   webproxy: true
   accessPolicy:
-    inbound:
-      rules:
-        - application: etterlatte-vedtaksvurdering
-          namespace: etterlatte
-          cluster: dev-gcp
-        - application: pensjon-pen-q2
-          namespace: pensjon-q2
-          cluster: dev-fss
-        - application: pensjon-psak-q2
-          namespace: pensjon-q2
-          cluster: dev-fss
-        - application: pensjon-elsam-minibuss-q2
-          namespace: pensjonsamhandling
-          cluster: dev-fss
-        - application: azure-token-generator
-          namespace: aura
-          cluster: dev-gcp
     outbound:
       rules:
         - application: sam-q2
