@@ -29,31 +29,31 @@ spec:
           delegationSource: altinn
           consumers:
             - name: SPK
-              orgnr: 982583462
+              orgno: 982583462
             - name: KLP
-              orgnr: 938708606
+              orgno: 938708606
             - name: GABLER PENSJONSTJENESTER AS
-              orgnr: 916833520
+              orgno: 916833520
             - name: OSLO PENSJONSFORSIKRING AS
-              orgnr: 982759412
+              orgno: 982759412
             - name: Storebrand Livsforsikring AS
-              orgnr: 958995369
+              orgno: 958995369
             - name: Storebrand Pensjonstjenester AS
-              orgnr: 931936492
+              orgno: 931936492
             - name: Viken
-              orgnr: 974371359
+              orgno: 974371359
             - name: Arendal kommunale pensjonskasse
-              orgnr: 940380014
+              orgno: 940380014
             - name: Drammen kommunale pensjonskasse
-              orgnr: 980650383
+              orgno: 980650383
             - name: Pensjonsordningen for apotekvirksomhet
-              orgnr: 940291380
+              orgno: 940291380
             - name: NAV
-              orgnr: 889640782
+              orgno: 889640782
             - name: Maritim pensjonskasse
-              orgnr: 940415683
+              orgno: 940415683
             - name: Garantikassen for fiskere
-              orgnr: 974652382
+              orgno: 974652382
   liveness:
     path: actuator/health/liveness
     initialDelay: 45
