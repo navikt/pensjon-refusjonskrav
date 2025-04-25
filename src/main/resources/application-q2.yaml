@@ -2,4 +2,4 @@
 
 sam:
   url: https://sam-q2.intern.dev.nav.no
-  scope: api://dev.pensjonsamhandling.sam-q2/.default
+  scope: api://dev-fss.pensjonsamhandling.sam-q2/.default
