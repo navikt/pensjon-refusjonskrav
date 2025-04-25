@@ -25,4 +25,3 @@ spec:
         - X-Request-Id
       backendHost: https://pensjon-refusjonskrav.prod-fss-pub.nais.io
       backendPath: /api/refusjonskrav
----
