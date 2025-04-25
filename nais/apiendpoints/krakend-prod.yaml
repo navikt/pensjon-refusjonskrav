@@ -9,13 +9,13 @@ spec:
   authProviders:
     - name: maskinporten
       alg: RS256
-      jwkUrl: "https://test.maskinporten.no/jwk"
-      issuer: "https://test.maskinporten.no/"
+      jwkUrl: "https://maskinporten.no/jwk"
+      issuer: "https://maskinporten.no/"
   ingress:
     className: nais-ingress-external
     enabled: true
     hosts:
-      - host: pensjon-gw.ekstern.dev.nav.no
+      - host: pensjon-gw.nav.no
         paths:
-          - path: /samordning/
+          - path: /refusjonskrav/
             pathType: ImplementationSpecific

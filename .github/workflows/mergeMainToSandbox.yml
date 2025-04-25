@@ -1,0 +1,91 @@
+name: Merge Main to Sandbox
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  merge-main-to-sandbox:
+    permissions:
+      contents: write
+      checks: write
+      id-token: write
+      packages: write
+    name: Merge main to sandbox
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+      - id: sandbox-exists
+        uses: GuillaumeFalourd/branch-exists@v1.1
+        with:
+          branch: sandbox
+      - name: Create sandbox
+        if: steps.sandbox-exists.outputs.exists == 'false'
+        uses: julbme/gh-action-manage-branch@v1
+        with:
+          name: sandbox
+          state: present
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Merge Main to Sandbox
+        uses: robotology/gh-action-nightly-merge@v1.5.2
+        with:
+          stable_branch: ${{ github.ref_name }}
+          development_branch: sandbox
+          allow_ff: true
+          allow_forks: true
+          user_name: GitHub Merge Actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  regenerateSandbox:
+    name: Regenerate sandbox
+    runs-on: ubuntu-latest
+    needs:
+      - merge-main-to-sandbox
+    if: failure()
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+      - id: sandbox-exists
+        uses: GuillaumeFalourd/branch-exists@v1.1
+        with:
+          branch: sandbox
+      - name: Delete sandbox
+        if: steps.sandbox-exists.outputs.exists == 'true'
+        uses: julbme/gh-action-manage-branch@v1
+        with:
+          name: sandbox
+          state: absent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create sandbox
+        uses: peterjgrainger/action-create-branch@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: sandbox
+  triggerBuildAndDeploy:
+    needs:
+      - merge-main-to-sandbox
+      - regenerateSandbox
+    if: always() && (needs.merge-main-to-sandbox.result == 'success' || needs.regenerateSandbox.result == 'success')
+    permissions:
+      actions: write
+    name: Trigger build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/buildAndDeploySandbox.yml/dispatches \
+            -d '{"ref":"sandbox"}' \
+            --fail
