@@ -10,7 +10,7 @@ spec:
   port: 8080
   ingresses:
     - https://pensjon-refusjonskrav.intern.dev.nav.no
-    - https://pensjon-refusjonskrav.dev-fss-pub.nais.io
+    - https://pensjon-refusjonskrav.ekstern.dev.nav.no
   webproxy: true
   accessPolicy:
     outbound:

@@ -41,22 +41,10 @@ jobs:
           team: pensjonsamhandling
           tag: ${{ github.event.repository.name }}-main
 
-      - name: Deploy to prod-fss
+      - name: Deploy to prod-gcp
         uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: prod-fss
+          CLUSTER: prod-gcp
           RESOURCE: nais/prod.yaml
           IMAGE: ${{ steps.docker-build-push.outputs.image }}
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
-
-      - name: Deploy krakenD config to prod-gcp
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: nais/apiendpoints/krakend-prod.yaml
-
-      - name: Deploy apiEndpoints config to prod-gcp
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: nais/apiendpoints/apiendpoints-prod.yaml

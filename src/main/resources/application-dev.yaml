@@ -1,5 +1,5 @@
 
 
 sam:
-  url: https://sam-q2.intern.dev.nav.no
+  url: https://sam-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.pensjonsamhandling.sam-q2/.default

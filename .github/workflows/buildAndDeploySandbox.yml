@@ -43,22 +43,10 @@ jobs:
           tag: ${{ github.event.repository.name }}-sandbox
 
       # Deploy
-      - name: Deploy to dev-fss
+      - name: Deploy to dev-gcp
         uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: nais/dev.yaml
           IMAGE: ${{ steps.docker-build-push.outputs.image }}
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
-
-      - name: Deploy krakenD config
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
-          RESOURCE: nais/apiendpoints/krakend-dev.yaml
-
-      - name: Deploy apiEndpoints config
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
-          RESOURCE: nais/apiendpoints/apiendpoints-dev.yaml
