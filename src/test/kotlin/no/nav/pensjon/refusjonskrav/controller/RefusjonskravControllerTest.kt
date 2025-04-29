@@ -55,6 +55,13 @@ class RefusjonskravControllerTest {
             )
         } returns ResponseEntity<OpprettRefusjonskravResponse>(OpprettRefusjonskravResponse(), HttpStatus.OK)
 
+        every {
+            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+        } returns ResponseEntity<String>(
+            "pong",
+            HttpStatus.OK
+        )
+
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
@@ -89,6 +96,14 @@ class RefusjonskravControllerTest {
                     ),
                     HttpStatus.OK
                 )
+
+        every {
+            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+        } returns ResponseEntity<String>(
+            "pong",
+            HttpStatus.OK
+        )
+
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
@@ -124,6 +139,13 @@ class RefusjonskravControllerTest {
                     HttpStatus.OK
                 )
 
+        every {
+            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+        } returns ResponseEntity<String>(
+            "pong",
+            HttpStatus.OK
+        )
+
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
@@ -156,6 +178,13 @@ class RefusjonskravControllerTest {
         } throws
                 RestClientException("Unexpected exception")
 
+        every {
+            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+        } returns ResponseEntity<String>(
+            "pong",
+            HttpStatus.OK
+        )
+
         mockMvc.post("/api/refusjonskrav/") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
@@ -166,7 +195,7 @@ class RefusjonskravControllerTest {
             print()
         }.andExpect {
             status {
-                isInternalServerError()
+                isBadGateway()
                 reason("Unexpected exception")
             }
         }
