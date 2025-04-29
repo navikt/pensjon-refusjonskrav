@@ -8,6 +8,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
+import java.time.Duration
 
 @Configuration
 @EnableJwtTokenValidation
@@ -24,5 +25,7 @@ class RestConfig(
         .additionalInterceptors(
             azureM2MTokenInterceptor,
             restTemplateMdcInterceptor)
+        .connectTimeout(Duration.ofSeconds(60))
+        .readTimeout(Duration.ofSeconds(60))
         .build()
 }
