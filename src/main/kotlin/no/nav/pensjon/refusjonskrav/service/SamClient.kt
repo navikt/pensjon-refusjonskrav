@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.getForEntity
 import org.springframework.web.server.ResponseStatusException
 
 @Service
@@ -16,7 +17,16 @@ class SamClient(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    fun ping() {
+        try {
+            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+        } catch (e: RestClientException) {
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM: ${e.message}", e)
+        }
+    }
+
     fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav) {
+        ping()
         try {
             val response = samRestTemplate.postForEntity(
                 "/api/refusjonskrav/",
