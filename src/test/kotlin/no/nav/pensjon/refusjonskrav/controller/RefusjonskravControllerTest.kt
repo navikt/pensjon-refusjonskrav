@@ -49,7 +49,7 @@ class RefusjonskravControllerTest {
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
         every {
             samRestTemplate.postForEntity(
-                "/api/refusjonskrav/",
+                "/api/refusjonskrav",
                 request,
                 OpprettRefusjonskravResponse::class.java
             )
@@ -62,7 +62,7 @@ class RefusjonskravControllerTest {
             HttpStatus.OK
         )
 
-        mockMvc.post("/api/refusjonskrav/") {
+        mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
             headers {
@@ -84,7 +84,7 @@ class RefusjonskravControllerTest {
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
         every {
             samRestTemplate.postForEntity(
-                "/api/refusjonskrav/",
+                "/api/refusjonskrav",
                 request,
                 OpprettRefusjonskravResponse::class.java
             )
@@ -104,7 +104,7 @@ class RefusjonskravControllerTest {
             HttpStatus.OK
         )
 
-        mockMvc.post("/api/refusjonskrav/") {
+        mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
             headers {
@@ -129,7 +129,7 @@ class RefusjonskravControllerTest {
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
         every {
             samRestTemplate.postForEntity(
-                "/api/refusjonskrav/",
+                "/api/refusjonskrav",
                 request,
                 OpprettRefusjonskravResponse::class.java
             )
@@ -146,7 +146,7 @@ class RefusjonskravControllerTest {
             HttpStatus.OK
         )
 
-        mockMvc.post("/api/refusjonskrav/") {
+        mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
             headers {
@@ -171,7 +171,7 @@ class RefusjonskravControllerTest {
         //samRestTemplate.postForEntity("/api/refusjonskrav", refusjonskrav, OpprettRefusjonskravResponse::class.java).body!!
         every {
             samRestTemplate.postForEntity(
-                "/api/refusjonskrav/",
+                "/api/refusjonskrav",
                 request,
                 OpprettRefusjonskravResponse::class.java
             )
@@ -185,7 +185,7 @@ class RefusjonskravControllerTest {
             HttpStatus.OK
         )
 
-        mockMvc.post("/api/refusjonskrav/") {
+        mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
             headers {

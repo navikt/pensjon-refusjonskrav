@@ -20,7 +20,7 @@ class RefusjonskravController(private val samClient: SamClient) {
 
     private val logger : Logger = LoggerFactory.getLogger(javaClass)
 
-    @PostMapping("/api/refusjonskrav/")
+    @PostMapping("/api/refusjonskrav")
     fun opprett(@RequestBody refusjonskrav: Refusjonskrav): ResponseEntity<Unit> {
 
         logger.debug("Refusjonkrav: {}", refusjonskrav)
