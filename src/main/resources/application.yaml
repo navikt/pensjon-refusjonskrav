@@ -10,3 +10,4 @@ no.nav.security.jwt:
       discovery-url: ${MASKINPORTEN_WELL_KNOWN_URL}
       validation.optional-claims:
         - aud
+        - sub
