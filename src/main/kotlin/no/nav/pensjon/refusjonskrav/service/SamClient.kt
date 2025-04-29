@@ -38,7 +38,7 @@ class SamClient(
             response.exceptionType?.throwResponseStatusException(response.message)
         } catch (e: RestClientException) {
             logger.error(e.message, e)
-            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
     }
 }
