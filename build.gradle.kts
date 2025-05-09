@@ -32,6 +32,7 @@ dependencies {
     implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
     implementation("no.nav.security", "token-validation-spring", tokensupportVersion)
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
+    implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-web")
 

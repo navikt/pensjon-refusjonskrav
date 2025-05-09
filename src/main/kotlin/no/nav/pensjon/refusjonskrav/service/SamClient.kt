@@ -1,6 +1,8 @@
 package no.nav.pensjon.refusjonskrav.service
 
+import no.nav.pensjon.refusjonskrav.domain.Melding
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import no.nav.pensjon.refusjonskrav.domain.SamPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -41,5 +43,17 @@ class SamClient(
         } catch (e: RestClientException) {
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
+    }
+
+    fun hentMelding(pid: String, samId: Long): Melding {
+        TODO("Hent melding fra SAM. Kaste exception hvis ikke funnet.")
+    }
+
+    fun lagreMelding(melding: Melding) {
+        TODO("Lagre melding.")
+    }
+
+    fun opprettHendelse(fnr: String, tpnr: String) {
+        TODO("Opprett refusjonskrav hendelse i SAM.")
     }
 }
