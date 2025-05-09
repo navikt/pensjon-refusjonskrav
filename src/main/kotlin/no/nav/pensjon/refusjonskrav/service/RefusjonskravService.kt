@@ -66,18 +66,18 @@ internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpCl
 
     }
 
-    fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
+    private fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
         melding.refusjonskrav = refusjonskrav
         melding.datoSvart = LocalDate.now()
         melding.meldingStatus = MeldingStatus.BESVART
         samClient.lagreMelding(melding)
     }
 
-    val Refusjonskrav.prioritetFom
+    private val Refusjonskrav.prioritetFom
         get() = tpClient.getYtelser(pid, tpNr).run {
             if (onlyAndresYtelser) prioritetFom.plusYears(YEAR_ADD_FACTOR) else prioritetFom
         }
-    fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
+    private fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
         val prioritetFom = prioritetFom
         val tpKredMap = melding.kredCodes
         return OpprettAndreTrekkRequest(
@@ -87,19 +87,19 @@ internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpCl
         )
     }
 
-    val Set<Ytelse>.prioritetFom: LocalDate
+    private val Set<Ytelse>.prioritetFom: LocalDate
         get() = last().innmeldtFom //TODO This must be wrong!
-    val Set<Ytelse>.onlyAndresYtelser
+    private val Set<Ytelse>.onlyAndresYtelser
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
 
-    val Melding.kredCodes: TPKredMap
+    private val Melding.kredCodes: TPKredMap
         get() = kredMapRepository.findByTssEksternIdFkAndUnderArt(tssEksternId, vedtak.underArt)
             ?: TODO("Feil ved henting av krediteringsmap")
 
-    val Melding.tpnr: String
+    private val Melding.tpnr: String
         get() = tpClient.getTpnr(tssEksternId)
 
-    val Vedtak.underArt: ArtType
+    private val Vedtak.underArt: ArtType
         get() = if (art == ArtType.UFOREP && !dateFom.isBefore(LocalDate.of(2015, 1, 1))) ArtType.UFOREUT
         else art
 
