@@ -15,6 +15,8 @@ import java.time.Duration
 class RestConfig(
     @Value("\${sam.url}")
     private val samUrl: String,
+    @Value("\${tp.url}")
+    private val tpUrl: String,
     private val azureM2MTokenInterceptor: AzureM2MTokenInterceptor,
     private val restTemplateMdcInterceptor: RestTemplateMdcInterceptor
 ) {
@@ -27,5 +29,10 @@ class RestConfig(
             restTemplateMdcInterceptor)
         .connectTimeout(Duration.ofSeconds(60))
         .readTimeout(Duration.ofSeconds(60))
+        .build()
+
+    @Bean
+    fun tpRestTemplate(): RestTemplate = RestTemplateBuilder()
+        .rootUri(tpUrl)
         .build()
 }

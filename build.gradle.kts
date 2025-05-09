@@ -6,6 +6,7 @@ val tokensupportVersion = "5.0.24"
 
 plugins {
     kotlin("jvm") version "2.1.20"
+    kotlin("plugin.jpa") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
@@ -32,6 +33,7 @@ dependencies {
     implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
     implementation("no.nav.security", "token-validation-spring", tokensupportVersion)
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
+    implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-web")
 

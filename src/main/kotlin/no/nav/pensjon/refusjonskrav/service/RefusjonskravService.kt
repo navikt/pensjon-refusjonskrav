@@ -1,43 +1,59 @@
 package no.nav.pensjon.refusjonskrav.service
 
-import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import no.nav.pensjon.refusjonskrav.domain.*
+import no.nav.pensjon.refusjonskrav.domain.okonomi.AndreTrekk
+import no.nav.pensjon.refusjonskrav.domain.okonomi.OpprettAndreTrekkRequest
+import no.nav.pensjon.refusjonskrav.domain.tp.Ytelse
+import no.nav.pensjon.refusjonskrav.repository.TPKredMapRepository
+import java.time.LocalDate
 
 //@Service
-internal class RefusjonskravService {
+internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpClient, val kredMapRepository: TPKredMapRepository) {
+
+    private val lastDayOfNextMonth: LocalDate
+        get() = LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)
 
 
     fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav) {
+        val melding = samClient.hentMelding(refusjonskrav.pid, refusjonskrav.samId)
 
-        //TODO Validere refisjonkrav med Periodiskebeløp
+        when {
+            melding.tpnr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet.")
+            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == VedtakStatus.BESVART -> TODO(
+                "Kaste exception hvis status 'BESVART'."
+            )
 
-        //TODO tjeneste for å hente SamPerson - med valgt samVedtak
-        //val samPerson/samVedtak = samClient.hentPerson(refusjonskrav.pid, refusjonskrav.samId)
+            refusjonskrav.periodisertBelopListe.isEmpty() -> {
+                registrerSvar(melding, false)
+                return
+            }
 
-        //TODO Kaste Exception hvis vedtak ikke funnet eller status "BESVART"
+            else -> {
+                refusjonskrav.periodisertBelopListe.forEach { refusjonstrekk ->
+                    when {
+                        refusjonstrekk.datoFom.isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
+                        refusjonstrekk.datoTom.isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
+                        melding.vedtak.dateTom?.isBefore(refusjonstrekk.datoTom) == true -> TODO("Kast exception.")
+                        melding.vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom) -> TODO("Kast exception.")
+                    }
+                }
+            }
+        }
 
-        //TODO Sjekker om refusjonstrekk i periodiserte beløp er innenfor vedtakets fom og tom
-
-        //TODO Oppretter og lagrer samordningshendelse på person
-        //samClient.opprettHendelse()
-
-        //TODO hent TP forholdListe med ytelser
-        //TODO Setter prioritet dersom ytelse barnepensjon eller gjenlevende
-        //prioritertDate + 200years
-
-        //TODO henter kredittLinjs fra tabel TPKredMapCodes (kan flyttes over til hit)
-        //val tpKredCodes = samCLient.hentKredMapCodes(tssid, ytel)
-
-        //TODO Setter samordningsmelding til besvart og lagrer.
-        //samCLient.oppdatertSamMelding("BESVART", fnr.. )
-
-        //TODO Kaller OS for å opprette andre trekk.
-        //rest/soap?
-        //osClient.opprettAndreTrekk(trekkRequest)
+        samClient.opprettHendelse(refusjonskrav.pid, refusjonskrav.tpNr)
 
 
-        //TODO sjekker om alle svar
-        //input: fagvedtakId
-        //sjekker om alle svar er mottat for samordningsmeldinger på samordningsvedtak
+        registrerSvar(melding, refusjonskrav.refusjonskrav)
+
+        refusjonskrav.createAndreTrekkRequest(melding)
+        /*
+         * TODO Kaller OS for å opprette andre trekk.
+         * rest/soap?
+         * osClient.opprettAndreTrekk(trekkRequest)
+         */
+
+        if (melding.vedtak.samordningMeldingListe.all { !it.meldingStatus.erBesvart })
+            TODO("AvsluttBehandlingSendMeldingLukkVedtak")
 
         //TODO oppdater samordningVedtak med IKKE_OVERFORT_PEN i database.
         //samCLient.oppdaterSamVedtak(fnr, samVedtakid, "IKKE_OVERFORT_PEN")
@@ -48,5 +64,47 @@ internal class RefusjonskravService {
         //svar til PEN(REST) hvis ikke EYO
         //        ellers til kafka
 
+    }
+
+    fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
+        melding.refusjonskrav = refusjonskrav
+        melding.datoSvart = LocalDate.now()
+        melding.meldingStatus = MeldingStatus.BESVART
+        samClient.lagreMelding(melding)
+    }
+
+    val Refusjonskrav.prioritetFom
+        get() = tpClient.getYtelser(pid, tpNr).run {
+            if (onlyAndresYtelser) prioritetFom.plusYears(YEAR_ADD_FACTOR) else prioritetFom
+        }
+    fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
+        val prioritetFom = prioritetFom
+        val tpKredMap = melding.kredCodes
+        return OpprettAndreTrekkRequest(
+            periodisertBelopListe.map {
+                AndreTrekk(pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
+            }
+        )
+    }
+
+    val Set<Ytelse>.prioritetFom: LocalDate
+        get() = last().innmeldtFom //TODO This must be wrong!
+    val Set<Ytelse>.onlyAndresYtelser
+        get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
+
+    val Melding.kredCodes: TPKredMap
+        get() = kredMapRepository.findByTssEksternIdFkAndUnderArt(tssEksternId, vedtak.underArt)
+            ?: TODO("Feil ved henting av krediteringsmap")
+
+    val Melding.tpnr: String
+        get() = tpClient.getTpnr(tssEksternId)
+
+    val Vedtak.underArt: ArtType
+        get() = if (art == ArtType.UFOREP && !dateFom.isBefore(LocalDate.of(2015, 1, 1))) ArtType.UFOREUT
+        else art
+
+
+    companion object {
+        const val YEAR_ADD_FACTOR: Long = 200
     }
 }
