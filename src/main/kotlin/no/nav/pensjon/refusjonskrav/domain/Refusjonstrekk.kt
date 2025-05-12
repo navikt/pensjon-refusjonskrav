@@ -1,13 +1,21 @@
 package no.nav.pensjon.refusjonskrav.domain
 
-import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonGetter
+import com.fasterxml.jackson.annotation.JsonSetter
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 data class Refusjonstrekk(
     var belop: Double,
     val kravstillersRef: String,
-    @get:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    @JsonSetter
     val datoFom: LocalDateTime,
-    @get:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    @JsonSetter
     val datoTom: LocalDateTime,
-)
+) {
+    @JsonGetter("datoFom")
+    fun datoFomMillis() = datoTom.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
+
+    @JsonGetter("datoTom")
+    fun datoTomMillis() = datoTom.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
+}
