@@ -14,7 +14,7 @@ data class Refusjonstrekk(
     val datoTom: LocalDateTime,
 ) {
     @JsonGetter("datoFom")
-    fun datoFomMillis() = datoTom.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
+    fun datoFomMillis() = datoFom.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
 
     @JsonGetter("datoTom")
     fun datoTomMillis() = datoTom.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
