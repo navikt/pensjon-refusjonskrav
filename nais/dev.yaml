@@ -14,10 +14,9 @@ spec:
   webproxy: true
   accessPolicy:
     outbound:
-      rules:
-        - application: sam-q2
-          namespace: pensjonsamhandling
-          cluster: dev-fss
+      external:
+        - host: sam-q2.dev-fss-pub.nais.io
+
   azure:
     application:
       enabled: true
