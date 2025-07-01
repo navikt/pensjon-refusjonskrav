@@ -7,9 +7,12 @@ import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ELEMENT_FINNES_IKKE
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
+import no.nav.pensjon.refusjonskrav.service.SamClient
 import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -40,6 +43,14 @@ class RefusjonskravControllerTest {
     @MockkBean
     private lateinit var samRestTemplate: RestTemplate
 
+    @MockkBean lateinit var tokenHelper: TokenHelper
+
+    @BeforeEach
+    fun setup() {
+        every { tokenHelper.getMaskinportenOrg() } returns "12345678901"
+    }
+
+
     @Test
     fun `valid request response is 201 No Content`() {
         val request = Refusjonskrav("12345678901", "3010", 1234L, true, emptyList())
@@ -62,11 +73,13 @@ class RefusjonskravControllerTest {
             HttpStatus.OK
         )
 
+        val token = mockEntraIdToken()
+
         mockMvc.post("/api/refusjonskrav") {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
             headers {
-                setBearerAuth(mockEntraIdToken())
+                header("Authorization", "Bearer $token")
             }
         }.andDo { print() }.andExpect {
             status {
