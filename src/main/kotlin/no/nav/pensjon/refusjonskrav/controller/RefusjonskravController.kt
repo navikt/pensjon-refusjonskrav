@@ -7,6 +7,7 @@ import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -28,4 +29,10 @@ class RefusjonskravController(private val samClient: SamClient) {
         return ResponseEntity.noContent().build()
 
     }
+
+    @GetMapping("/api/ping")
+    fun ping() = ResponseEntity.noContent().also {
+        logger.info("Ping utført")
+    }
+
 }
