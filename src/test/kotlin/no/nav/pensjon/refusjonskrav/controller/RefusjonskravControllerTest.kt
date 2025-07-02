@@ -20,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -39,7 +38,7 @@ internal class RefusjonskravControllerTest {
     @Autowired
     protected lateinit var server: MockOAuth2Server
 
-    @SpykBean
+    @MockkBean
     private lateinit var azureM2MTokenInterceptor: AzureM2MTokenInterceptor
 
     @MockkBean
