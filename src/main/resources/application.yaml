@@ -5,7 +5,7 @@ no.nav.security.jwt:
   issuer:
     entraID:
       discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
-      accepted-audience: ${AZURE_APP_CLIENT_ID}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
     maskinporten:
       discovery-url: ${MASKINPORTEN_WELL_KNOWN_URL}
       validation.optional-claims:

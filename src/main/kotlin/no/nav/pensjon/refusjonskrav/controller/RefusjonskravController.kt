@@ -6,6 +6,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequiredIssuers(
-    ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon/refusjonskrav"]),
-    ProtectedWithClaims(issuer = "entraID")
+    ProtectedWithClaims(issuer = "entraID"),
+    ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon/refusjonskrav"])
 )
 class RefusjonskravController(private val samClient: SamClient) {
 
@@ -31,8 +32,7 @@ class RefusjonskravController(private val samClient: SamClient) {
     }
 
     @GetMapping("/api/ping")
-    fun ping() = ResponseEntity.noContent().also {
-        logger.info("Ping utført")
-    }
+    fun ping(): ResponseEntity<Boolean> = ResponseEntity.ok().body<Boolean>(true)
+        .also { logger.info("Ping utført") }
 
 }
