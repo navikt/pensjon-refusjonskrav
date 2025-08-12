@@ -136,7 +136,7 @@ class RefusjonskravControllerTest {
         } returns
                 ResponseEntity<OpprettRefusjonskravResponse>(
                     OpprettRefusjonskravResponse("No tpforhold exist", ELEMENT_FINNES_IKKE),
-                    HttpStatus.OK
+                    HttpStatus.NOT_FOUND
                 )
 
         every {

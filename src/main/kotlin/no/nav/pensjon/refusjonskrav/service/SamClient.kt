@@ -5,13 +5,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 
 @Service
 class SamClient(
-    private val samRestTemplate: RestTemplate
+    private val samRestTemplate: RestTemplate,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -35,8 +36,9 @@ class SamClient(
                 logger.info("opprettet refusjonskrav ok")
             }
             response.exceptionType?.throwResponseStatusException(response.message)
+        } catch (e: HttpStatusCodeException) {
+            throw ResponseStatusException(e.statusCode, e.message)
         } catch (e: RestClientException) {
-            logger.error(e.message, e)
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
     }
