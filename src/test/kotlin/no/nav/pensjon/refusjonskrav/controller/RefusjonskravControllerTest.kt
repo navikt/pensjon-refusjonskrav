@@ -1,7 +1,9 @@
 package no.nav.pensjon.refusjonskrav.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nimbusds.jose.JOSEObjectType
 import com.ninjasquad.springmockk.MockkBean
+import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
@@ -9,6 +11,7 @@ import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ELEME
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
 import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,15 +21,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableMockOAuth2Server
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class RefusjonskravControllerTest {
+internal class RefusjonskravControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -201,25 +205,55 @@ class RefusjonskravControllerTest {
         }
     }
 
+    @Test
+    fun `test for ekstern bruk av ping`() {
+        val token = mockEntraIdToken()
+
+        mockMvc.get("/api/ping") {
+            contentType = MediaType.APPLICATION_JSON
+            headers {
+                setBearerAuth(token)
+                contentType = MediaType.APPLICATION_JSON
+            }
+        }.andDo {
+            print()
+        }.andExpect {
+            status {
+                isOk()
+                content { true }
+            }
+        }
+
+    }
+
     fun mockEntraIdToken(): String = token(
         issuerId = "entraID",
-        audience = "refusjonskrav-test",
+        audience = listOf("refusjonskrav-test", "tp"),
         claims = mapOf(
             "azp_name" to UUID.randomUUID().toString(),
-            "roles" to listOf<String>(),
-            "idtyp" to "app"
+            "idtyp" to "app",
+            "azp_name" to "MockOAuth2Server",
         )
     )
 
     private fun token(
         issuerId: String,
-        audience: String,
+        audience: List<String>,
+        subject: String = UUID.randomUUID().toString(),
         claims: Map<String, Any>): String {
 
         return server.issueToken(
             issuerId = issuerId,
-            audience = audience,
-            claims = claims
+            clientId = "test-client",
+            tokenCallback = DefaultOAuth2TokenCallback(
+                issuerId = issuerId,
+                typeHeader = JOSEObjectType.JWT.type,
+                audience = audience,
+                subject = subject,
+                claims = claims,
+                expiry = 3322L
+            )
         ).serialize()
     }
+
 }

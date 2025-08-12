@@ -1,3 +1,4 @@
+
 sam:
   url: http://localhost
   scope: sam
@@ -9,4 +10,8 @@ no.nav.security.jwt:
   issuer:
     entraID:
       discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
-      accepted-audience: ${AZURE_APP_CLIENT_ID}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
+
+server:
+  error:
+    include-message: always
