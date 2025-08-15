@@ -1,7 +1,7 @@
 
 sam:
-  url: http://localhost
-  scope: sam
+  url: http://localhost:9090
+  scope: bogus
 
 AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/entraID/.well-known/openid-configuration
 AZURE_APP_CLIENT_ID: refusjonskrav-test

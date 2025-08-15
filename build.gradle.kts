@@ -36,10 +36,13 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-web")
 
     testImplementation(kotlin("test-junit5"))
+    testImplementation("org.wiremock:wiremock-standalone:3.13.1")
     testImplementation("com.ninja-squad", "springmockk", "3.1.0")
     testImplementation("no.nav.security", "mock-oauth2-server", "2.1.10")
     testImplementation("no.nav.security", "token-validation-spring-test", tokensupportVersion)
-    testImplementation("org.springframework.boot", "spring-boot-starter-test")
+    testImplementation("org.springframework.boot", "spring-boot-starter-test") {
+        exclude(module = "mockito-core")
+    }
 
 }
 
