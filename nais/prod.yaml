@@ -1,0 +1,95 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: pensjon-refusjonskrav
+  namespace: pensjonsamhandling
+  labels:
+    team: pensjonsamhandling
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://pensjon-refusjonskrav.intern.nav.no
+    - https://pensjon-refusjonskrav.ekstern.nav.no
+  webproxy: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: sam.prod-fss-pub.nais.io
+
+  azure:
+    application:
+      enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: refusjonskrav
+          product: pensjon
+          separator: /
+          enabled: true
+          delegationSource: altinn
+          consumers:
+            - name: SPK
+              orgno: "982583462"
+            - name: KLP
+              orgno: "938708606"
+            - name: GABLER PENSJONSTJENESTER AS
+              orgno: "916833520"
+            - name: OSLO PENSJONSFORSIKRING AS
+              orgno: "982759412"
+            - name: Storebrand Livsforsikring AS
+              orgno: "958995369"
+            - name: Storebrand Pensjonstjenester AS
+              orgno: "931936492"
+            - name: Viken
+              orgno: "974371359"
+            - name: Arendal kommunale pensjonskasse
+              orgno: "940380014"
+            - name: Drammen kommunale pensjonskasse
+              orgno: "980650383"
+            - name: Pensjonsordningen for apotekvirksomhet
+              orgno: "940291380"
+            - name: NAV
+              orgno: "889640782"
+            - name: Maritim pensjonskasse
+              orgno: "940415683"
+            - name: Garantikassen for fiskere
+              orgno: "974652382"
+  liveness:
+    path: actuator/health/liveness
+    initialDelay: 45
+    periodSeconds: 1
+    failureThreshold: 60
+  readiness:
+    path: actuator/health/readiness
+    initialDelay: 45
+    periodSeconds: 1
+    failureThreshold: 60
+  replicas:
+    min: 2
+    max: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+  prometheus:
+    enabled: true
+    path: actuator/prometheus
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: LOGGING_CONFIG
+      value: classpath:logback-json.xml
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: deployment.environment.name=p
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
