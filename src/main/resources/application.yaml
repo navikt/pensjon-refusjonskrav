@@ -1,6 +1,5 @@
 
 
-sam.url: https://sam.intern.nav.no
 server:
   error:
     include-message: always
