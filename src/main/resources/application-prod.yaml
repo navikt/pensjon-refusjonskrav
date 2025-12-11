@@ -1,5 +1,0 @@
-
-
-sam:
-  url: https://sam.prod-fss-pub.nais.io
-  scope: api://prod-fss.pensjonsamhandling.sam/.default
