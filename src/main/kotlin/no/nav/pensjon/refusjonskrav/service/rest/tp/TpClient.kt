@@ -1,7 +1,7 @@
-package no.nav.pensjon.refusjonskrav.service
+package no.nav.pensjon.refusjonskrav.service.rest.tp
 
-import no.nav.pensjon.refusjonskrav.domain.OrdningDto
-import no.nav.pensjon.refusjonskrav.domain.tp.Ytelse
+import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.OrdningDto
+import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

@@ -4,7 +4,7 @@ import com.nimbusds.jwt.JWTParser
 import jakarta.validation.Valid
 import no.nav.pensjon.refusjonskrav.config.MaskinportenValidator
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.SamClient
+import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.Logger

@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain
+package no.nav.pensjon.refusjonskrav.service.rest.tp.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

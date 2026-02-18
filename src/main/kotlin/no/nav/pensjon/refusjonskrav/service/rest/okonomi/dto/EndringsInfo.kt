@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain.okonomi
+package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
 import java.time.LocalDateTime
 

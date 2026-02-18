@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain.tp
+package no.nav.pensjon.refusjonskrav.service.rest.tp.dto
 
 import java.time.LocalDate
 

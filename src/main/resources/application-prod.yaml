@@ -1,4 +1,12 @@
+pen:
+  url: http://pensjon-pen.pensjondeployer.svc.nais.local/api
+  scope: api://prod-fss.pensjondeployer.pensjon-pen/.default
 sam:
   url: https://sam.prod-fss-pub.nais.io
   scope: api://prod-fss.pensjonsamhandling.sam/.default
-tp.url: https://tp-api.prod-fss-pub.nais.io
+tp:
+  url: https://tp-api.prod-fss-pub.nais.io
+  scope: api://prod-fss.pensjonsamhandling.tp/.default
+vedtak:
+  samhandlersvar:
+    topic: pensjonsamhandling.sam-vedtak-samhandlersvar-p

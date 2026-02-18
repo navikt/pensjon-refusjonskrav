@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain.okonomi
+package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
 /**
  * Contains codes for OS (Oppdragssystemet). Used in consumer services.

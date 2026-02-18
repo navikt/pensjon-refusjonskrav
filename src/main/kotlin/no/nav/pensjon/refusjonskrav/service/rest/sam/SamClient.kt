@@ -1,8 +1,8 @@
-package no.nav.pensjon.refusjonskrav.service
+package no.nav.pensjon.refusjonskrav.service.rest.sam
 
 import no.nav.pensjon.refusjonskrav.domain.Melding
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.domain.SamPerson
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.getForEntity
+import org.springframework.web.client.postForEntity
 import org.springframework.web.server.ResponseStatusException
 
 @Service
@@ -21,7 +23,7 @@ class SamClient(
 
     fun ping() {
         try {
-            samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
+            samRestTemplate.getForEntity<String>("/api/refusjonskrav/ping")
         } catch (e: RestClientException) {
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM: ${e.message}", e)
         }
@@ -30,10 +32,9 @@ class SamClient(
     fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav) {
         ping()
         try {
-            val response = samRestTemplate.postForEntity(
+            val response = samRestTemplate.postForEntity<OpprettRefusjonskravResponse>(
                 "/api/refusjonskrav",
-                refusjonskrav,
-                OpprettRefusjonskravResponse::class.java
+                refusjonskrav
             ).body!!.also {
                 logger.info("opprettet refusjonskrav ok")
             }

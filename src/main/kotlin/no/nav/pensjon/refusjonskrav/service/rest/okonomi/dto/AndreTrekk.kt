@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain.okonomi
+package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.domain.TPKredMap
@@ -46,8 +46,8 @@ data class AndreTrekk(
         trekktypeKode = tpKredCodes.trekkType,
         sats = refusjonstrekk.belop.toString(),
         kreditorRef = refusjonstrekk.kravstillersRef,
-        trekkperiodeFom = refusjonstrekk.datoFom,
-        trekkperiodeTom = refusjonstrekk.datoTom,
+        trekkperiodeFom = refusjonstrekk.datoFom.toLocalDate(),
+        trekkperiodeTom = refusjonstrekk.datoTom.toLocalDate(),
         prioritetFom = prioritetFom,
         trekkAlternativKode = KOppdragssystemCodes.LOPM,
         endringsInfo = EndringsInfo(

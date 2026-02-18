@@ -3,12 +3,11 @@ package no.nav.pensjon.refusjonskrav.controller
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.JOSEObjectType
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
-import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ELEMENT_FINNES_IKKE
-import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravExceptions.ELEMENT_FINNES_IKKE
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravResponse
 import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback

@@ -1,10 +1,14 @@
 package no.nav.pensjon.refusjonskrav.service
 
 import no.nav.pensjon.refusjonskrav.domain.*
-import no.nav.pensjon.refusjonskrav.domain.okonomi.AndreTrekk
-import no.nav.pensjon.refusjonskrav.domain.okonomi.OpprettAndreTrekkRequest
-import no.nav.pensjon.refusjonskrav.domain.tp.Ytelse
+import no.nav.pensjon.refusjonskrav.domain.VedtakStatus.IKKE_OVERFORT_PEN
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
+import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import no.nav.pensjon.refusjonskrav.repository.TPKredMapRepository
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
+import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
+import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
 import java.time.LocalDate
 
 //@Service
@@ -12,7 +16,7 @@ internal class RefusjonskravService(
     private val samClient: SamClient,
     private val tpClient: TpClient,
     private val osClient: OsClient,
-    private val meldingService: MeldingService,
+    private val vedtakService: VedtakService,
     private val kredMapRepository: TPKredMapRepository
 ) {
 
@@ -55,15 +59,19 @@ internal class RefusjonskravService(
             osClient.opprettAndreTrekk(andreTrekkRequest)
         }
 
-
         if (melding.vedtak.samordningMeldingListe.all { !it.meldingStatus.erBesvart })
-            TODO("AvsluttBehandlingSendMeldingLukkVedtak")
+            avsluttBehandling(melding.vedtak)
+    }
 
-        //TODO oppdater samordningVedtak med IKKE_OVERFORT_PEN i database.
-        //samCLient.oppdaterSamVedtak(fnr, samVedtakid, "IKKE_OVERFORT_PEN")
+    private fun avsluttBehandling(vedtak: Vedtak) {
+        if (vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
+            TODO("Oppdater samordningVedtak med IKKE_OVERFORT_PEN i database")
+            //samCLient.oppdaterSamVedtak(fnr, samVedtakid, IKKE_OVERFORT_PEN)
 
+        if (vedtak.vedtakStatus == IKKE_OVERFORT_PEN)
+            vedtakService.lukkVedtak(vedtak)
 
-        meldingService.varsleMelding(melding)
+        TODO("Oppdater samordningVedtak med BESVART i database")
     }
 
     private fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
