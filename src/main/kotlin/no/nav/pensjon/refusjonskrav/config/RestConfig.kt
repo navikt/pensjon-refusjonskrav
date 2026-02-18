@@ -17,6 +17,8 @@ class RestConfig(
     private val samUrl: String,
     @Value("\${tp.url}")
     private val tpUrl: String,
+    @Value("\${pen.url}")
+    private val penUrl: String,
     private val azureM2MTokenInterceptor: AzureM2MTokenInterceptor,
     private val restTemplateMdcInterceptor: RestTemplateMdcInterceptor
 ) {
@@ -34,5 +36,10 @@ class RestConfig(
     @Bean
     fun tpRestTemplate(): RestTemplate = RestTemplateBuilder()
         .rootUri(tpUrl)
+        .build()
+
+    @Bean
+    fun penRestTemplate(): RestTemplate = RestTemplateBuilder()
+        .rootUri(penUrl)
         .build()
 }

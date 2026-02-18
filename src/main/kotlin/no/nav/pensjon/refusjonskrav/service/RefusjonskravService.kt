@@ -8,7 +8,13 @@ import no.nav.pensjon.refusjonskrav.repository.TPKredMapRepository
 import java.time.LocalDate
 
 //@Service
-internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpClient, val kredMapRepository: TPKredMapRepository) {
+internal class RefusjonskravService(
+    private val samClient: SamClient,
+    private val tpClient: TpClient,
+    private val osClient: OsClient,
+    private val meldingService: MeldingService,
+    private val kredMapRepository: TPKredMapRepository
+) {
 
     private val lastDayOfNextMonth: LocalDate
         get() = LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)
@@ -31,10 +37,10 @@ internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpCl
             else -> {
                 refusjonskrav.periodisertBelopListe.forEach { refusjonstrekk ->
                     when {
-                        refusjonstrekk.datoFom.isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
-                        refusjonstrekk.datoTom.isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
-                        melding.vedtak.dateTom?.isBefore(refusjonstrekk.datoTom) == true -> TODO("Kast exception.")
-                        melding.vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom) -> TODO("Kast exception.")
+                        refusjonstrekk.datoFom.toLocalDate().isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
+                        refusjonstrekk.datoTom.toLocalDate().isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
+                        melding.vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
+                        melding.vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
                     }
                 }
             }
@@ -45,12 +51,10 @@ internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpCl
 
         registrerSvar(melding, refusjonskrav.refusjonskrav)
 
-        refusjonskrav.createAndreTrekkRequest(melding)
-        /*
-         * TODO Kaller OS for å opprette andre trekk.
-         * rest/soap?
-         * osClient.opprettAndreTrekk(trekkRequest)
-         */
+        refusjonskrav.createAndreTrekkRequest(melding).also { andreTrekkRequest ->
+            osClient.opprettAndreTrekk(andreTrekkRequest)
+        }
+
 
         if (melding.vedtak.samordningMeldingListe.all { !it.meldingStatus.erBesvart })
             TODO("AvsluttBehandlingSendMeldingLukkVedtak")
@@ -59,11 +63,7 @@ internal class RefusjonskravService(val samClient: SamClient, val tpClient: TpCl
         //samCLient.oppdaterSamVedtak(fnr, samVedtakid, "IKKE_OVERFORT_PEN")
 
 
-        //TODO send penClient hvis PEN eller kafka hvis EYO
-        //oppdater samordningVedtak med BESVART i db.
-        //svar til PEN(REST) hvis ikke EYO
-        //        ellers til kafka
-
+        meldingService.varsleMelding(melding)
     }
 
     private fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
