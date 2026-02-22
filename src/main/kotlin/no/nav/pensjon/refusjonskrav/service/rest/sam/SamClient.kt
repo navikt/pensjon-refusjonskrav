@@ -23,8 +23,9 @@ class SamClient(
 
     fun ping() {
         try {
-            samRestTemplate.getForEntity<String>("/api/refusjonskrav/ping")
+            samRestTemplate.getForEntity<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
+            logger.error("SAM unavailable.", e)
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM: ${e.message}", e)
         }
     }
