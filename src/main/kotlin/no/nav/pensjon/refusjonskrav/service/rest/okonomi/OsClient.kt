@@ -6,16 +6,20 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.getForObject
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class OsClient {
+class OsClient(
+    private val osRestTemplate: RestTemplate,
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun ping() {
         try {
-            TODO("Ping OS.")
+            osRestTemplate.getForObject<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
             logger.error("OS unavailable.", e)
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping OS: ${e.message}", e)
@@ -23,6 +27,11 @@ class OsClient {
     }
 
     fun opprettAndreTrekk(request: OpprettAndreTrekkRequest) {
-        TODO("Send request to OS")
+        try {
+            osRestTemplate.postForLocation("/api/nav-cons-sto-sam-trekk/opprettAndreTrekk", request)
+        } catch (e: RestClientException) {
+            logger.error("Opprett AndreTrekk failed", e)
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Opprett AndreTrekk failed", e)
+        }
     }
 }

@@ -1,3 +1,6 @@
+oppdrag:
+  scope: api://prod-fss.okonomi.sokos-oppdrag-proxy/.default
+  url: http://sokos-oppdrag-proxy.okonomi.svc.nais.local/
 pen:
   url: http://pensjon-pen.pensjondeployer.svc.nais.local/api
   scope: api://prod-fss.pensjondeployer.pensjon-pen/.default

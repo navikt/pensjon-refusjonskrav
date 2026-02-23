@@ -78,4 +78,22 @@ class RestConfig(
             restTemplateMdcInterceptor
         )
         .build()
+
+    @Bean
+    fun osAzureM2MTokenInterceptor(
+        @Value("\${oppdrag.scope}")
+        osScope: String
+    ) = azureM2MTokenInterceptorBuilder.buildForScope(osScope)
+
+    @Bean fun osRestTemplate(
+        @Value("\${oppdrag.url}")
+        osUrl: String,
+        osAzureM2MTokenInterceptor: AzureM2MTokenInterceptor,
+        restTemplateMdcInterceptor: RestTemplateMdcInterceptor
+    ): RestTemplate = RestTemplateBuilder()
+        .rootUri(osUrl)
+        .additionalInterceptors(
+            osAzureM2MTokenInterceptor,
+            restTemplateMdcInterceptor
+        ).build()
 }
