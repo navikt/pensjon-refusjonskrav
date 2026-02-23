@@ -40,12 +40,7 @@ internal class RefusjonskravService(
 
             else -> {
                 refusjonskrav.periodisertBelopListe.forEach { refusjonstrekk ->
-                    when {
-                        refusjonstrekk.datoFom.toLocalDate().isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
-                        refusjonstrekk.datoTom.toLocalDate().isBefore(melding.vedtak.dateFom) -> TODO("Kast exception.")
-                        melding.vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
-                        melding.vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
-                    }
+                    melding.validateRefusjonstrekk(refusjonstrekk)
                 }
             }
         }
@@ -55,11 +50,9 @@ internal class RefusjonskravService(
 
         registrerSvar(melding, refusjonskrav.refusjonskrav)
 
-        refusjonskrav.createAndreTrekkRequest(melding).also { andreTrekkRequest ->
-            osClient.opprettAndreTrekk(andreTrekkRequest)
-        }
+        refusjonskrav.opprettAndreTrekk(melding)
 
-        if (melding.vedtak.samordningMeldingListe.all { !it.meldingStatus.erBesvart })
+        if (melding.vedtak.allSamordningMeldingerBesvart)
             avsluttBehandling(melding.vedtak)
     }
 
@@ -81,6 +74,15 @@ internal class RefusjonskravService(
         samClient.lagreMelding(melding)
     }
 
+    private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) {
+        when {
+            refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
+            refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
+            vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
+            vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
+        }
+    }
+
     private val Refusjonskrav.prioritetFom
         get() = tpClient.getYtelser(pid, tpNr).run {
             if (onlyAndresYtelser) prioritetFom.plusYears(YEAR_ADD_FACTOR) else prioritetFom
@@ -93,6 +95,9 @@ internal class RefusjonskravService(
                 AndreTrekk(pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
             }
         )
+    }
+    private fun Refusjonskrav.opprettAndreTrekk(melding: Melding) {
+        osClient.opprettAndreTrekk(createAndreTrekkRequest(melding))
     }
 
     private val Set<Ytelse>.prioritetFom: LocalDate

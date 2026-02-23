@@ -13,4 +13,7 @@ class Vedtak(
     val samordningMeldingListe: Set<Melding>,
     val dateFom: LocalDate,
     val dateTom: LocalDate?
-)
+) {
+    val allSamordningMeldingerBesvart
+        get() = samordningMeldingListe.all { it.meldingStatus.erBesvart }
+}
