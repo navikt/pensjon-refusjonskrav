@@ -23,8 +23,8 @@ class TpClient(
         TODO("Lag bedre endepunkt i TP")
     }
 
-    fun getTpnr(tssId: String) = try {
-        tpRestTemplate.getForObject<OrdningDto>("/api/ordning?tssId=$tssId").tpNr
+    fun getTssEksternId(tpnr: String) = try {
+        tpRestTemplate.getForObject<OrdningDto>("/api/ordning?tpnr=$tpnr").tssId!!
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
         throw ResponseStatusException(HttpStatus.BAD_GATEWAY)

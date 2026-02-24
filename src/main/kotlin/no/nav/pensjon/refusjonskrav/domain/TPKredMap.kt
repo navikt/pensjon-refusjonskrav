@@ -2,6 +2,7 @@ package no.nav.pensjon.refusjonskrav.domain
 
 import jakarta.persistence.*
 import no.nav.pensjon.refusjonskrav.domain.support.ChangeStamp
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.ArtType
 import java.util.*
 
 data class TPKredMap(
@@ -10,6 +11,7 @@ data class TPKredMap(
     @Column(name = "K_TP_KRED_MAP_ID")
     val tpKredMapId: Long = 0,
 
+    //TODO: Replace with TPNR
     @Column(name = "TSS_EKSTERN_ID_FK")
     val tssEksternIdFk: String,
 

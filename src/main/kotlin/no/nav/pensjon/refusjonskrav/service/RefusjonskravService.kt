@@ -1,14 +1,21 @@
 package no.nav.pensjon.refusjonskrav.service
 
-import no.nav.pensjon.refusjonskrav.domain.*
-import no.nav.pensjon.refusjonskrav.domain.VedtakStatus.IKKE_OVERFORT_PEN
-import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
-import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
-import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
+import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
+import no.nav.pensjon.refusjonskrav.domain.TPKredMap
 import no.nav.pensjon.refusjonskrav.repository.TPKredMapRepository
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
 import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.ArtType
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.MeldingStatus
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.BESVART
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.IKKE_OVERFORT_PEN
 import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
+import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import java.time.LocalDate
 
 //@Service
@@ -25,12 +32,12 @@ internal class RefusjonskravService(
 
 
     fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav) {
-        val melding = samClient.hentMelding(refusjonskrav.pid, refusjonskrav.samId)
+        var melding = samClient.hentMelding(refusjonskrav.pid, refusjonskrav.samId, refusjonskrav.tpNr)
 
         when {
-            melding.tpnr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet.")
-            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == VedtakStatus.BESVART -> TODO(
-                "Kaste exception hvis status 'BESVART'."
+            melding.tpNr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Skal ikke være mulig.")
+            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART -> TODO(
+                "Kaste exception hvis status 'BESVART'. SAM skal ha svart CONFLICT hvis dette er tilfellet."
             )
 
             refusjonskrav.periodisertBelopListe.isEmpty() -> {
@@ -48,30 +55,38 @@ internal class RefusjonskravService(
         samClient.opprettHendelse(refusjonskrav.pid, refusjonskrav.tpNr)
 
 
-        registrerSvar(melding, refusjonskrav.refusjonskrav)
+        melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
 
         refusjonskrav.opprettAndreTrekk(melding)
 
-        if (melding.vedtak.allSamordningMeldingerBesvart)
+        if (melding.vedtak.alleMeldingerBesvart)
             avsluttBehandling(melding.vedtak)
     }
 
+    /*TODO: Consider:
+    try {
+        vedtakService.lukkVedtak(vedtak)
+        samClient.oppdaterVedtak(vedtak, BESVART)
+    } catch (_: Exception) {
+        if(vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
+            samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
+    }
+     */
     private fun avsluttBehandling(vedtak: Vedtak) {
         if (vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
-            TODO("Oppdater samordningVedtak med IKKE_OVERFORT_PEN i database")
-            //samCLient.oppdaterSamVedtak(fnr, samVedtakid, IKKE_OVERFORT_PEN)
+            samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
 
         if (vedtak.vedtakStatus == IKKE_OVERFORT_PEN)
             vedtakService.lukkVedtak(vedtak)
 
-        TODO("Oppdater samordningVedtak med BESVART i database")
+        samClient.oppdaterVedtak(vedtak, BESVART)
     }
 
-    private fun registrerSvar(melding: Melding, refusjonskrav: Boolean) {
+    private fun registrerSvar(melding: Melding, refusjonskrav: Boolean): Melding {
         melding.refusjonskrav = refusjonskrav
         melding.datoSvart = LocalDate.now()
         melding.meldingStatus = MeldingStatus.BESVART
-        samClient.lagreMelding(melding)
+        return samClient.lagreMelding(melding)
     }
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) {
@@ -90,9 +105,10 @@ internal class RefusjonskravService(
     private fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
         val prioritetFom = prioritetFom
         val tpKredMap = melding.kredCodes
+        //TODO: Melding should contain TPNR, convert to TSS ekstern ID here.
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
+                AndreTrekk(pid, tpKredMap.tssEksternIdFk, prioritetFom, tpKredMap, it)
             }
         )
     }
@@ -108,9 +124,8 @@ internal class RefusjonskravService(
     private val Melding.kredCodes: TPKredMap
         get() = kredMapRepository.findByTssEksternIdFkAndUnderArt(tssEksternId, vedtak.underArt)
             ?: TODO("Feil ved henting av krediteringsmap")
-
-    private val Melding.tpnr: String
-        get() = tpClient.getTpnr(tssEksternId)
+    private val Melding.tssEksternId
+        get() = tpClient.getTssEksternId(tpNr)
 
     private val Vedtak.underArt: ArtType
         get() = if (art == ArtType.UFOREP && !dateFom.isBefore(LocalDate.of(2015, 1, 1))) ArtType.UFOREUT

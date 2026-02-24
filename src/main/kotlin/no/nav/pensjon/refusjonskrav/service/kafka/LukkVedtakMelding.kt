@@ -1,6 +1,6 @@
 package no.nav.pensjon.refusjonskrav.service.kafka
 
-import no.nav.pensjon.refusjonskrav.domain.Vedtak
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
 
 data class LukkVedtakMelding(
     val fagomrade: String,

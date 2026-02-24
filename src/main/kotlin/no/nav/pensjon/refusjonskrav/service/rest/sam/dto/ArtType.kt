@@ -1,4 +1,4 @@
-package no.nav.pensjon.refusjonskrav.domain
+package no.nav.pensjon.refusjonskrav.service.rest.sam.dto
 
 enum class ArtType {
 

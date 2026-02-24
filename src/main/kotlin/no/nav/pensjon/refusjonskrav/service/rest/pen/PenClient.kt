@@ -1,6 +1,6 @@
 package no.nav.pensjon.refusjonskrav.service.rest.pen
 
-import no.nav.pensjon.refusjonskrav.domain.Vedtak
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

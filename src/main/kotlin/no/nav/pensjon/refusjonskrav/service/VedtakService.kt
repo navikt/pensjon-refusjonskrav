@@ -1,9 +1,9 @@
 package no.nav.pensjon.refusjonskrav.service
 
-import no.nav.pensjon.refusjonskrav.domain.Fagomrade.AAP
-import no.nav.pensjon.refusjonskrav.domain.Fagomrade.EYO
-import no.nav.pensjon.refusjonskrav.domain.Fagomrade.PEN
-import no.nav.pensjon.refusjonskrav.domain.Vedtak
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Fagomrade.AAP
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Fagomrade.EYO
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Fagomrade.PEN
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
 import no.nav.pensjon.refusjonskrav.service.kafka.LukkVedtakMeldingProducer
 import no.nav.pensjon.refusjonskrav.service.rest.pen.PenClient
 import org.slf4j.Logger
