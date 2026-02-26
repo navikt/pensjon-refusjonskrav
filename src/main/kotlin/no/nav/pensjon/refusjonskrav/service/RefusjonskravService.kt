@@ -16,6 +16,8 @@ import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.BESVART
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.IKKE_OVERFORT_PEN
 import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 
 //@Service
@@ -32,13 +34,13 @@ internal class RefusjonskravService(
 
 
     fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav) {
-        var melding = samClient.hentMelding(refusjonskrav.pid, refusjonskrav.samId, refusjonskrav.tpNr)
+        var melding = samClient.hentMelding(refusjonskrav.samId)
 
         when {
-            melding.tpNr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Skal ikke være mulig.")
-            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART -> TODO(
-                "Kaste exception hvis status 'BESVART'. SAM skal ha svart CONFLICT hvis dette er tilfellet."
-            )
+            melding.vedtak.person != refusjonskrav.pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
+            melding.tpNr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
+            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
+                throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
 
             refusjonskrav.periodisertBelopListe.isEmpty() -> {
                 registrerSvar(melding, false)
@@ -117,7 +119,7 @@ internal class RefusjonskravService(
     }
 
     private val Set<Ytelse>.prioritetFom: LocalDate
-        get() = last().innmeldtFom //TODO This must be wrong!
+        get() = last().innmeldtFom
     private val Set<Ytelse>.onlyAndresYtelser
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
 

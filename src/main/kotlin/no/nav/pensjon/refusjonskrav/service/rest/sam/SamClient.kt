@@ -1,8 +1,7 @@
 package no.nav.pensjon.refusjonskrav.service.rest.sam
 
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.FindSamordningMeldingRequest
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravResponse
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus
@@ -10,12 +9,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.getForEntity
-import org.springframework.web.client.postForEntity
-import org.springframework.web.client.postForObject
+import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
 
 @Service
@@ -51,14 +45,10 @@ class SamClient(
         }
     }
 
-    fun hentMelding(pid: String, samId: Long, tpnr: String) = try {
-        samRestTemplate.postForObject<Melding>(
-            "/api/melding/search",
-            FindSamordningMeldingRequest(pid, samId, tpnr)
-        )
+    fun hentMelding(samId: Long) = try {
+        samRestTemplate.getForObject<Melding>("/api/melding/$samId")
     } catch (e: HttpStatusCodeException) {
         when (e.statusCode) {
-            HttpStatus.CONFLICT -> TODO("Throw exception for melding allerede besvart.")
             HttpStatus.NOT_FOUND -> TODO("Throw exception for melding ikke funnet.")
             else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
@@ -76,7 +66,7 @@ class SamClient(
 
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
-            TODO("Oppdater samordningVedtak med i database")
+            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.fagVedtakId}/status", status)
             vedtak.vedtakStatus = status
         } catch (e: HttpStatusCodeException) {
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)

@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 class Vedtak(
     val samVedtakId: Long,
+    val person: String,
     val fagomrade: Fagomrade,
     val fagVedtakId: Long,
     var vedtakStatus: VedtakStatus,
