@@ -1,16 +1,14 @@
 package no.nav.pensjon.refusjonskrav.service.rest.sam
 
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.OpprettRefusjonskravResponse
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
+import java.time.LocalDate
 
 @Service
 class SamClient(
@@ -56,8 +54,13 @@ class SamClient(
         throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
     }
 
-    fun lagreMelding(melding: Melding): Melding {
-        TODO("Lagre melding.")
+    fun updateMelding(melding: Melding, refusjonskrav: Boolean, datoSvart: LocalDate, status: MeldingStatus): Melding {
+        samRestTemplate.patchForObject<Unit>("api/melding/${melding.samId}", UpdateMeldingRequest(
+            refusjonskrav,
+            datoSvart,
+            status
+        ))
+        return hentMelding(melding.samId)
     }
 
     fun opprettHendelse(fnr: String, tpnr: String) {
@@ -66,7 +69,7 @@ class SamClient(
 
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
-            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.fagVedtakId}/status", status)
+            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.fagVedtakId}/status", UpdateVedtakRequest(status))
             vedtak.vedtakStatus = status
         } catch (e: HttpStatusCodeException) {
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)

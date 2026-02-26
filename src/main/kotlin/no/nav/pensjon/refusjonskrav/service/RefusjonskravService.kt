@@ -84,12 +84,12 @@ internal class RefusjonskravService(
         samClient.oppdaterVedtak(vedtak, BESVART)
     }
 
-    private fun registrerSvar(melding: Melding, refusjonskrav: Boolean): Melding {
-        melding.refusjonskrav = refusjonskrav
-        melding.datoSvart = LocalDate.now()
-        melding.meldingStatus = MeldingStatus.BESVART
-        return samClient.lagreMelding(melding)
-    }
+    private fun registrerSvar(melding: Melding, refusjonskrav: Boolean): Melding = samClient.updateMelding(
+        melding,
+        refusjonskrav,
+        LocalDate.now(),
+        MeldingStatus.BESVART
+    )
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) {
         when {
