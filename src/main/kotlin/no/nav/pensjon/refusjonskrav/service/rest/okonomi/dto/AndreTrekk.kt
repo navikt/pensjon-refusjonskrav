@@ -42,7 +42,7 @@ data class AndreTrekk(
         refusjonstrekk: Refusjonstrekk
     ) : this(
         debitorOffnr = pid,
-        tssEksternId = tssEksternId,
+        tssEksternId = tpKredCodes.tssEksternIdKre,
         trekktypeKode = tpKredCodes.trekkType,
         sats = refusjonstrekk.belop.toString(),
         kreditorRef = refusjonstrekk.kravstillersRef,

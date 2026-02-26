@@ -110,7 +110,7 @@ internal class RefusjonskravService(
         //TODO: Melding should contain TPNR, convert to TSS ekstern ID here.
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(pid, tpKredMap.tssEksternIdFk, prioritetFom, tpKredMap, it)
+                AndreTrekk(pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
             }
         )
     }
