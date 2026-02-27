@@ -56,22 +56,19 @@ class SamClient(
         throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
     }
 
-    fun updateMelding(melding: Melding, refusjonskrav: Boolean, datoSvart: LocalDate, status: MeldingStatus): Melding {
-        try {
-            samRestTemplate.patchForObject<Unit>("/api/melding/${melding.samId}/status", UpdateMeldingRequest(
-                refusjonskrav,
-                datoSvart,
-                status
-            ))
-        } catch (e: HttpStatusCodeException) {
-            when (e.statusCode) {
-                HttpStatus.NOT_FOUND -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningMelding ikke funnet.", e)
-                else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
-            }
-        } catch (e: RestClientException) {
-            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+    fun updateMelding(melding: Melding, refusjonskrav: Boolean, datoSvart: LocalDate, status: MeldingStatus) = try {
+        samRestTemplate.patchForObject<Melding>("/api/melding/${melding.samId}/status", UpdateMeldingRequest(
+            refusjonskrav,
+            datoSvart,
+            status
+        ))
+    } catch (e: HttpStatusCodeException) {
+        when (e.statusCode) {
+            HttpStatus.NOT_FOUND -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningMelding ikke funnet.", e)
+            else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
-        return hentMelding(melding.samId)
+    } catch (e: RestClientException) {
+        throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
     }
 
     fun opprettHendelse(fnr: String, tpnr: String) {
