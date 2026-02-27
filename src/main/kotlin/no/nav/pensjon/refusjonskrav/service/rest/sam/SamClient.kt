@@ -78,7 +78,7 @@ class SamClient(
 
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
-            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.fagVedtakId}", UpdateVedtakRequest(status))
+            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
             vedtak.vedtakStatus = status
         } catch (e: HttpStatusCodeException) {
             when (e.statusCode) {
