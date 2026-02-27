@@ -2,6 +2,8 @@ package no.nav.pensjon.refusjonskrav.service.rest.sam
 
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.*
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.HendelseType.REFUSJONSKRAV
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.KanalType.WEB_SERVICE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -73,7 +75,22 @@ class SamClient(
     }
 
     fun opprettHendelse(fnr: String, tpnr: String) {
-        TODO("Opprett refusjonskrav hendelse i SAM.")
+        try {
+            samRestTemplate.postForObject<Unit>("/api/hendelse",
+                OpprettHendelseRequest(
+                    fnr = fnr,
+                    tpnr = tpnr,
+                    hendelseType = REFUSJONSKRAV,
+                    kanalType = WEB_SERVICE
+                )
+            )
+        } catch (e: HttpStatusCodeException) {
+            when (e.statusCode) {
+                else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+            }
+        } catch (e: RestClientException) {
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+        }
     }
 
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
