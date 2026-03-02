@@ -28,9 +28,10 @@ class OsClient(
 
     fun opprettAndreTrekk(request: OpprettAndreTrekkRequest) {
         try {
+            logger.info("Calling OS for AndreTrekk")
             osRestTemplate.postForLocation("/api/nav-cons-sto-sam-trekk/opprettAndreTrekk", request)
-        } catch (e: RestClientException) {
-            logger.error("Opprett AndreTrekk failed", e)
+        }  catch (e: RestClientException) {
+            logger.error("Failed to create AndreTrekk.", e)
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Opprett AndreTrekk failed", e)
         }
     }

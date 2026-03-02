@@ -16,6 +16,7 @@ import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.BESVART
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.IKKE_OVERFORT_PEN
 import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
@@ -29,20 +30,25 @@ internal class RefusjonskravService(
     private val kredMapRepository: TPKredMapRepository
 ) {
 
+    private val logger = getLogger(javaClass)
+
     private val lastDayOfNextMonth: LocalDate
         get() = LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)
 
 
     fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav) {
+        logger.info("Processing refusjonskrav for melding: ${refusjonskrav.samId}.")
         var melding = samClient.hentMelding(refusjonskrav.samId)
 
+        logger.debug("Validating refusjonskrav.")
         when {
-            melding.vedtak.person != refusjonskrav.pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
+            melding.pid != refusjonskrav.pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
             melding.tpNr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
             melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
                 throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
 
             refusjonskrav.periodisertBelopListe.isEmpty() -> {
+                logger.info("Empty refusjonskrav, closing melding.")
                 registrerSvar(melding, false)
                 return
             }
@@ -54,7 +60,7 @@ internal class RefusjonskravService(
             }
         }
 
-        samClient.opprettHendelse(refusjonskrav.pid, refusjonskrav.tpNr)
+        samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
 
 
         melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
@@ -92,6 +98,7 @@ internal class RefusjonskravService(
     )
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) {
+        logger.debug("Validating refusjonstrekk.")
         when {
             refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
             refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
@@ -100,17 +107,17 @@ internal class RefusjonskravService(
         }
     }
 
-    private val Refusjonskrav.prioritetFom
+    private val Melding.prioritetFom
         get() = tpClient.getYtelser(pid, tpNr).run {
             if (onlyAndresYtelser) prioritetFom.plusYears(YEAR_ADD_FACTOR) else prioritetFom
         }
     private fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
-        val prioritetFom = prioritetFom
+        val prioritetFom = melding.prioritetFom
         val tpKredMap = melding.kredCodes
         //TODO: Melding should contain TPNR, convert to TSS ekstern ID here.
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
+                AndreTrekk(melding.pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
             }
         )
     }

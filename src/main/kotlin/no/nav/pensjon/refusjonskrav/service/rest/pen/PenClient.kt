@@ -28,6 +28,12 @@ class PenClient(
     }
 
     fun lukkVedtak(vedtak: Vedtak) {
-        penRestTemplate.postForObject<Unit>("/vedtak/${vedtak.fagVedtakId}/mottaSamhandlerSvar")
+        logger.info("Closing vedtak: ${vedtak.samVedtakId}")
+        try {
+            penRestTemplate.postForObject<Unit>("/vedtak/${vedtak.fagVedtakId}/mottaSamhandlerSvar")
+        } catch (e: Exception) {
+            logger.error("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
+            throw e
+        }
     }
 }

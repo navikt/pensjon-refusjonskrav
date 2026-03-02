@@ -19,6 +19,7 @@ class VedtakService(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun lukkVedtak(vedtak: Vedtak) {
+        logger.debug("Closing vedtak with fagomrade: ${vedtak.fagomrade}.")
         when(vedtak.fagomrade) {
             PEN -> varslePen(vedtak)
             EYO, AAP -> varsleKafka(vedtak)

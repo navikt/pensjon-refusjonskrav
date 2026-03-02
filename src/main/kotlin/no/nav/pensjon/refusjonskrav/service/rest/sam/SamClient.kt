@@ -35,7 +35,7 @@ class SamClient(
                 "/api/refusjonskrav",
                 refusjonskrav
             ).body!!.also {
-                logger.info("opprettet refusjonskrav ok")
+                logger.info("Opprettet refusjonskrav ok")
             }
             response.exceptionType?.throwResponseStatusException(response.message)
         } catch (e: HttpStatusCodeException) {
@@ -49,30 +49,41 @@ class SamClient(
         samRestTemplate.getForObject<Melding>("/api/melding/$samId")
     } catch (e: HttpStatusCodeException) {
         when (e.statusCode) {
-            HttpStatus.NOT_FOUND -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningMelding ikke funnet.", e)
-            else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+            HttpStatus.NOT_FOUND -> {
+                logger.warn("Melding not found: $samId.", e)
+                throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningMelding ikke funnet.", e)
+            }
+            else -> {
+                logger.error("Failed to get melding: $samId.", e)
+                throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+            }
         }
     } catch (e: RestClientException) {
+        logger.error("Failed to get melding: $samId.", e)
         throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
     }
 
     fun updateMelding(melding: Melding, refusjonskrav: Boolean, datoSvart: LocalDate, status: MeldingStatus) = try {
+        logger.info("Updating melding: ${melding.samId}, refusjonskrav: $refusjonskrav, datoSvart: $datoSvart, status: $status.")
         samRestTemplate.patchForObject<Melding>("/api/melding/${melding.samId}/status", UpdateMeldingRequest(
             refusjonskrav,
             datoSvart,
             status
         ))
     } catch (e: HttpStatusCodeException) {
+        logger.error("Failed to update melding: ${melding.samId}.", e)
         when (e.statusCode) {
             HttpStatus.NOT_FOUND -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningMelding ikke funnet.", e)
             else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
     } catch (e: RestClientException) {
+        logger.error("Failed to update melding: ${melding.samId}.", e)
         throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
     }
 
     fun opprettHendelse(fnr: String, tpnr: String) {
         try {
+            logger.debug("Creating hendelse.")
             samRestTemplate.postForObject<Unit>("/api/hendelse",
                 OpprettHendelseRequest(
                     fnr = fnr,
@@ -81,25 +92,25 @@ class SamClient(
                     kanalType = WEB_SERVICE
                 )
             )
-        } catch (e: HttpStatusCodeException) {
-            when (e.statusCode) {
-                else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
-            }
-        } catch (e: RestClientException) {
+        }  catch (e: RestClientException) {
+            logger.error("Failed to create hendelse.", e)
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
     }
 
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
+            logger.info("Updating vedtak: ${vedtak.samVedtakId}, status: $status.")
             samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
             vedtak.vedtakStatus = status
         } catch (e: HttpStatusCodeException) {
+            logger.error("Failed to update vedtak: ${vedtak.samVedtakId}.", e)
             when (e.statusCode) {
                 HttpStatus.NOT_FOUND -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "SamordningVedtak ikke funnet.", e)
                 else -> throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
             }
         } catch (e: RestClientException) {
+            logger.error("Failed to update vedtak: ${vedtak.samVedtakId}.", e)
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.message)
         }
     }

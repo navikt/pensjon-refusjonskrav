@@ -17,6 +17,12 @@ class LukkVedtakMeldingProducer(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun lukkVedtak(vedtak: Vedtak) {
-        kafkaTemplate.send(topic, LukkVedtakMelding(vedtak))
+        try {
+            logger.info("Closing vedtak: ${vedtak.samVedtakId}.")
+            kafkaTemplate.send(topic, LukkVedtakMelding(vedtak)).get()
+        } catch (e: Exception) {
+            logger.error("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
+            throw e
+        }
     }
 }
