@@ -41,34 +41,36 @@ internal class RefusjonskravService(
         var melding = samClient.hentMelding(refusjonskrav.samId)
 
         logger.debug("Validating refusjonskrav.")
-        when {
-            melding.pid != refusjonskrav.pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
-            melding.tpNr != refusjonskrav.tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
-            melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
-                throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
+        if (refusjonskrav.validateFields(melding)) {
+            samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
 
-            refusjonskrav.periodisertBelopListe.isEmpty() -> {
-                logger.info("Empty refusjonskrav, closing melding.")
-                registrerSvar(melding, false)
-                return
-            }
+            melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
 
-            else -> {
-                refusjonskrav.periodisertBelopListe.forEach { refusjonstrekk ->
-                    melding.validateRefusjonstrekk(refusjonstrekk)
-                }
-            }
+            refusjonskrav.opprettAndreTrekk(melding)
+
+            if (melding.vedtak.alleMeldingerBesvart)
+                avsluttBehandling(melding.vedtak)
+        }
+    }
+
+    fun Refusjonskrav.validateFields(melding: Melding) = when {
+        melding.pid != pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
+        melding.tpNr != tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
+        melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
+
+        periodisertBelopListe.isEmpty() -> {
+            logger.info("Empty refusjonskrav, closing melding.")
+            registrerSvar(melding, false)
+            false
         }
 
-        samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
-
-
-        melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
-
-        refusjonskrav.opprettAndreTrekk(melding)
-
-        if (melding.vedtak.alleMeldingerBesvart)
-            avsluttBehandling(melding.vedtak)
+        else -> {
+            logger.debug("Validating refusjonstrekk.")
+            periodisertBelopListe.all { refusjonstrekk ->
+                melding.validateRefusjonstrekk(refusjonstrekk)
+            }
+        }
     }
 
     /*TODO: Consider:
@@ -97,14 +99,12 @@ internal class RefusjonskravService(
         MeldingStatus.BESVART
     )
 
-    private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) {
-        logger.debug("Validating refusjonstrekk.")
-        when {
-            refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
-            refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
-            vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
-            vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
-        }
+    private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) = when {
+        refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
+        refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
+        vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
+        vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
+        else -> true
     }
 
     private val Melding.prioritetFom
