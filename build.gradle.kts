@@ -24,8 +24,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("reflect"))
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
-    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.17.2")
+    implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", "2.21.1")
+    implementation("tools.jackson.module", "jackson-module-kotlin", "3.1.0")
     implementation("io.micrometer", "micrometer-core", "1.13.4")
     implementation("io.micrometer", "micrometer-registry-prometheus", "1.13.4")
     implementation("net.logstash.logback", "logstash-logback-encoder", "8.0")
@@ -52,5 +52,12 @@ kotlin {
 tasks{
     test {
         useJUnitPlatform()
+    }
+}
+tasks {
+    compileKotlin {
+        compilerOptions {
+            freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
+        }
     }
 }

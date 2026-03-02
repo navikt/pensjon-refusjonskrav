@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class VedtakService(
     private val penClient: PenClient,
-    private val LukkVedtakMeldingProducer: LukkVedtakMeldingProducer
+    private val lukkVedtakMeldingProducer: LukkVedtakMeldingProducer
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -27,5 +27,5 @@ class VedtakService(
 
     private fun varslePen(vedtak: Vedtak) = penClient.lukkVedtak(vedtak)
 
-    private fun varsleKafka(vedtak: Vedtak) = LukkVedtakMeldingProducer.lukkVedtak(vedtak)
+    private fun varsleKafka(vedtak: Vedtak) = lukkVedtakMeldingProducer.lukkVedtak(vedtak)
 }
