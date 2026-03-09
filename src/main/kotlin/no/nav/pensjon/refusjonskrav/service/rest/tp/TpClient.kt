@@ -1,16 +1,17 @@
 package no.nav.pensjon.refusjonskrav.service.rest.tp
 
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.OrdningDto
+import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.PersonDto
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus.*
+import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.getForEntity
-import org.springframework.web.client.getForObject
+import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
+import java.net.URI
 
 @Service
 class TpClient(
@@ -19,22 +20,43 @@ class TpClient(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun getYtelser(fnr: String, tpnr: String): Set<Ytelse> {
-        TODO("Lag bedre endepunkt i TP")
+    //TODO("Bedre endepunkt kommer i TP API v2, bruk av QUERY.")
+    fun getYtelser(fnr: String, tpnr: String): Set<Ytelse> = try {
+        tpRestTemplate.exchange<PersonDto>(RequestEntity(
+            mapOf(
+                "fnr" to fnr,
+                "tpnr" to tpnr
+            ),
+            HttpMethod.GET,
+            URI("/api/finnForholdForBruker")
+        )).run {
+            if (statusCode == OK) body!!.forhold.first().ytelser
+            else {
+                logger.error("TP unavailable, response status: ${statusCode}.")
+                throw ResponseStatusException(
+                    BAD_GATEWAY
+                )
+            }
+        }
+    } catch (e: RestClientException) {
+        logger.error("TP unavailable.", e)
+        throw ResponseStatusException(
+            BAD_GATEWAY
+        )
     }
 
     fun getTssEksternId(tpnr: String) = try {
         tpRestTemplate.getForObject<OrdningDto>("/api/ordning?tpnr=$tpnr").tssId!!
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
-        throw ResponseStatusException(HttpStatus.BAD_GATEWAY)
+        throw ResponseStatusException(BAD_GATEWAY)
     }
 
     fun ping() {
         try {
             tpRestTemplate.getForEntity<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping TP: ${e.message}", e)
+            throw ResponseStatusException(SERVICE_UNAVAILABLE, "Failed to ping TP: ${e.message}", e)
         }
     }
 }
