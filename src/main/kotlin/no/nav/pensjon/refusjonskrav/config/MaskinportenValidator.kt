@@ -22,7 +22,7 @@ class MaskinportenValidator(
         token.jwtClaimsSet.apply {
             if (issuer == maskinportenIssuer) {
                 try {
-                    restTemplate.getForEntity<Boolean>("/organisation/validate/${tpnr}_$orgno")
+                    restTemplate.getForEntity<Boolean>("/api/tpconfig/organisation/validate/${tpnr}_$orgno")
                 } catch (e: RestClientException) {
                     throw ResponseStatusException(FORBIDDEN, "tpnr: $tpnr is not managed by orgno: $orgno", e)
                 }
