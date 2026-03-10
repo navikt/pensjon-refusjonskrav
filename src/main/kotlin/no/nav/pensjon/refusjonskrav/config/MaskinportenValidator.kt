@@ -34,10 +34,8 @@ class MaskinportenValidator(
                 val tokenOrgno = getJSONObjectClaim("consumer")["ID"].toString().substringAfterLast(':')
                 try {
                     log.info("Maskinporten token received. Validating tpnr: $tpnr is managed by orgno: $tokenOrgno")
-                    restTemplate.getForObject<OrdningDto>("/api/ordning/$tpnr").apply {
-                        if (orgNr != tokenOrgno && administeringOrgNr != tokenOrgno)
+                    if (fetchOrdning(tpnr).orgNr != tokenOrgno)
                             throw ResponseStatusException(FORBIDDEN, "tpnr: $tpnr is not managed by orgno: $tokenOrgno")
-                    }
                 } catch (e: HttpStatusCodeException) {
                     if (e.statusCode == NOT_FOUND) throw ResponseStatusException(NOT_FOUND, "Cannot find ordning $tpnr.")
                     else {
@@ -52,11 +50,11 @@ class MaskinportenValidator(
         }
     }
 
+    fun fetchOrdning(tpnr: String): OrdningDto = restTemplate.getForObject<OrdningDto>("/api/ordning/$tpnr")
+
     data class OrdningDto(
         val navn: String,
         val tpNr: String,
-        val orgNr: String,
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        val administeringOrgNr: String? = null
+        val orgNr: String
     )
 }
