@@ -11,7 +11,6 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.getForObject
 import org.springframework.web.server.ResponseStatusException
-import java.time.Duration.ofSeconds
 
 @Service
 class MaskinportenValidator(
@@ -19,7 +18,7 @@ class MaskinportenValidator(
     @Value("\${tp.url}") tpUrl: String
 ) {
 
-    private val restTemplate = RestTemplateBuilder().rootUri(tpUrl).readTimeout(ofSeconds(10)).build()
+    private val restTemplate = RestTemplateBuilder().rootUri(tpUrl).build()
     private val log: Logger = LoggerFactory.getLogger(javaClass)
 
     fun validateTpnrAuthorization(tpnr: String, token: JWT) {
