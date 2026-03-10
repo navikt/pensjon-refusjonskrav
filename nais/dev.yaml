@@ -18,7 +18,7 @@ spec:
         - host: sokos-oppdrag-proxy-q2.dev-fss-pub.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
         - host: sam-q2.dev-fss-pub.nais.io
-        - host: tp-q2.dev-fss-pub.nais.io
+        - host: tp-api-q2.dev-fss-pub.nais.io
   azure:
     application:
       enabled: true
