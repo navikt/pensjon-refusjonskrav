@@ -1,14 +1,14 @@
 oppdrag:
+  url: http://sokos-oppdrag-proxy-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.okonomi.sokos-oppdrag-proxy-q2/.default
-  url: http://sokos-oppdrag-proxy-q2.okonomi.svc.nais.local/
 pen:
-  url: https://pensjon-pen-q2.dev.adeo.no/api
+  url: https://pensjon-pen-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.pensjon-q2.pensjon-pen-q2/.default
 sam:
   url: https://sam-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.pensjonsamhandling.sam-q2/.default
 tp:
-  url: https://tp-api-q2.dev-fss-pub.nais.io
+  url: https://tp-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.pensjonsamhandling.tp-q2/.default
 vedtak:
   samhandlersvar:

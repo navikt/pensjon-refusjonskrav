@@ -15,9 +15,10 @@ spec:
   accessPolicy:
     outbound:
       external:
+        - host: sokos-oppdrag-proxy.prod-fss-pub.nais.io
+        - host: pensjon-pen.prod-fss-pub.nais.io
         - host: sam.prod-fss-pub.nais.io
         - host: tp-api.prod-fss-pub.nais.io
-
   azure:
     application:
       enabled: true
