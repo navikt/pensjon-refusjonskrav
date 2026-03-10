@@ -1,20 +1,14 @@
 package no.nav.pensjon.refusjonskrav.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.nimbusds.jwt.JWT
-import com.nimbusds.jwt.JWTClaimsSet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.BAD_GATEWAY
-import org.springframework.http.HttpStatus.FORBIDDEN
-import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
-import org.springframework.web.client.getForEntity
 import org.springframework.web.client.getForObject
 import org.springframework.web.server.ResponseStatusException
 import java.time.Duration.ofSeconds
