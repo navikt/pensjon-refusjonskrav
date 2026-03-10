@@ -6,8 +6,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.getForEntity
 import org.springframework.web.server.ResponseStatusException
@@ -28,8 +30,15 @@ class MaskinportenValidator(
                 try {
                     log.info("Maskinporten token received. Validating tpnr: $tpnr is managed by orgno: $orgno")
                     restTemplate.getForEntity<Boolean>("/api/tpconfig/organisation/validate/${tpnr}_$orgno")
+                } catch (e: HttpStatusCodeException) {
+                    if (e.statusCode == HttpStatus.NOT_FOUND) throw ResponseStatusException(FORBIDDEN, "tpnr: $tpnr is not managed by orgno: $orgno", e)
+                    else {
+                        log.error("Unexpected response from TP on tpnr validation.", e)
+                        throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unexpected response from TP on tpnr validation.", e)
+                    }
                 } catch (e: RestClientException) {
-                    throw ResponseStatusException(FORBIDDEN, "tpnr: $tpnr is not managed by orgno: $orgno", e)
+                    log.error("Unexpected error from TP on tpnr validation.", e)
+                    throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unexpected error from TP on tpnr validation.", e)
                 }
             }
         }
