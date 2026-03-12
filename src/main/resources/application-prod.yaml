@@ -1,3 +1,4 @@
 sam:
   url: https://sam.prod-fss-pub.nais.io
   scope: api://prod-fss.pensjonsamhandling.sam/.default
+tp.url: https://tp-api.prod-fss-pub.nais.io

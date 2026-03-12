@@ -2,6 +2,8 @@
 sam:
   url: http://localhost
   scope: sam
+tp:
+  url: http://localhost
 
 AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/entraID/.well-known/openid-configuration
 AZURE_APP_CLIENT_ID: refusjonskrav-test
@@ -11,6 +13,8 @@ no.nav.security.jwt:
     entraID:
       discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
       accepted_audience: ${AZURE_APP_CLIENT_ID}
+
+MASKINPORTEN_ISSUER: placeholder
 
 server:
   error:

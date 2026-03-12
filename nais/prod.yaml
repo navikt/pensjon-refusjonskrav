@@ -16,6 +16,7 @@ spec:
     outbound:
       external:
         - host: sam.prod-fss-pub.nais.io
+        - host: tp-api.prod-fss-pub.nais.io
 
   azure:
     application:
