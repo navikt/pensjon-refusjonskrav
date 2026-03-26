@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.*
     ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon/refusjonskrav"])
 )
 class RefusjonskravController(
-    private val samClient: SamClient,
-    private val maskinportenValidator: MaskinportenValidator
+    private val samClient: SamClient
 ) {
 
     private val logger : Logger = LoggerFactory.getLogger(javaClass)
@@ -29,12 +28,8 @@ class RefusjonskravController(
     @PostMapping("/api/refusjonskrav")
     fun opprett(
         @Valid @RequestBody refusjonskrav: Refusjonskrav,
-        @RequestHeader(name = "Authorization") bearerToken: String
+        @RequestAttribute(required = false) orgno: String?
     ): ResponseEntity<Unit> {
-        maskinportenValidator.validateTpnrAuthorization(
-            refusjonskrav.tpNr,
-            JWTParser.parse(bearerToken.removePrefix("Bearer "))
-        )
         logger.debug("Refusjonkrav: {}", refusjonskrav)
         samClient.opprettRefusjonskrav(refusjonskrav)
         return ResponseEntity.noContent().build()

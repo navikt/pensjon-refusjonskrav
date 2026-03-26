@@ -52,6 +52,24 @@ class TpClient(
         throw ResponseStatusException(BAD_GATEWAY)
     }
 
+    fun validateTpnr(tpnr: String, orgno: String): Boolean {
+        try {
+            logger.info("Maskinporten token received. Validating tpnr: $tpnr is managed by orgno: $orgno")
+            return doValidation(tpnr, orgno)
+        } catch (e: HttpStatusCodeException) {
+            if (e.statusCode == NOT_FOUND) throw ResponseStatusException(FORBIDDEN, "Failed validation. $tpnr not managed by $orgno.")
+            else {
+                logger.error("Unexpected response from TP on tpnr validation.", e)
+                throw ResponseStatusException(BAD_GATEWAY, "Unexpected response from TP on tpnr validation.", e)
+            }
+        } catch (e: RestClientException) {
+            logger.error("Unexpected error from TP on tpnr validation.", e)
+            throw ResponseStatusException(BAD_GATEWAY, "Unexpected error from TP on tpnr validation.", e)
+        }
+    }
+
+    private fun doValidation(tpnr: String, orgno: String) = tpRestTemplate.getForObject<Boolean>("/api/tpconfig/organisation/validate/" + tpnr + "_" + orgno)
+
     fun ping() {
         try {
             tpRestTemplate.getForEntity<String>("/actuator/health/readiness")

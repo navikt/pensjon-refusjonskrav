@@ -36,12 +36,12 @@ internal class RefusjonskravService(
         get() = LocalDate.now().plusMonths(2).withDayOfMonth(1).minusDays(1)
 
 
-    fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav) {
+    fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav, orgno: String?) {
         logger.info("Processing refusjonskrav for melding: ${refusjonskrav.samId}.")
         var melding = samClient.hentMelding(refusjonskrav.samId)
 
         logger.debug("Validating refusjonskrav.")
-        if (refusjonskrav.validateFields(melding)) {
+        if (refusjonskrav.validateFields(melding, orgno)) {
             samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
 
             melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
@@ -53,9 +53,10 @@ internal class RefusjonskravService(
         }
     }
 
-    fun Refusjonskrav.validateFields(melding: Melding) = when {
+    fun Refusjonskrav.validateFields(melding: Melding, orgno: String?) = when {
         melding.pid != pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
-        melding.tpNr != tpNr -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
+        melding.tpNr != tpNr
+                || (orgno != null && tpClient.validateTpnr(melding.tpNr, orgno)) -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
         melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
             throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
 
