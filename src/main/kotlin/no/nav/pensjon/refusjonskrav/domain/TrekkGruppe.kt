@@ -1,63 +1,70 @@
-package no.nav.pensjon.refusjonskrav.service.rest.sam.dto
+package no.nav.pensjon.refusjonskrav.domain
 
-enum class ArtType {
+enum class TrekkGruppe {
+
+    /**
+     * Arbeidsavklaringspenger
+     */
+    AAP,
 
     /**
      * Alderspensjon
      */
-    ALDER,
+    PEAP,
 
     /**
      * Gjenlevendeytelse
      */
-    GJENLEV,
+    PEGJ,
 
     /**
      * Uføretrygd
      */
-    UFOREP,
+    PEUP,
 
     /**
      * AFP
      */
-    AFP,
+    PEAF,
 
     /**
      * Barnepensjon
      */
-    BARNEP,
+    PEBP,
 
     /**
      * Krigspensjon
      */
-    KRIGP,
+    PEKP,
 
     /**
      * Gammel yrkesskade
      */
-    GAM_YRK,
+    PEGY,
 
     /**
      * AFP Privat
      */
-    AFP_PRIVAT,
+    PEPP,
 
     /**
      * Familiepleierytelse
      */
-    FAM_PL,
+//    FAM_PL(
+//
+//    ),
     /** Omstillingstønad
      *
      */
-    OMS,
+    OMST,
     /**
      * Samordningspliktige ytelser for AFP Offentlig
      *
      */
-    OPPSATT_BTO_PEN,
-    SAERALDER,
+//    OPPSATT_BTO_PEN,
+//    SAERALDER,
     /**
      * UFOREP etter 01-01-2015.
      */
-    UFOREUT;
+    UFORE;
 }

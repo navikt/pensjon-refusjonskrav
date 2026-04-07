@@ -1,5 +1,6 @@
 package no.nav.pensjon.refusjonskrav.service.rest.sam.dto
 
+import no.nav.pensjon.refusjonskrav.domain.ArtType
 import java.time.LocalDate
 
 class Vedtak(

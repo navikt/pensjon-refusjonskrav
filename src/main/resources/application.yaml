@@ -11,3 +11,6 @@ no.nav.security.jwt:
       validation.optional-claims:
         - aud
         - sub
+spring:
+  config:
+    import: classpath:kredmap.yaml

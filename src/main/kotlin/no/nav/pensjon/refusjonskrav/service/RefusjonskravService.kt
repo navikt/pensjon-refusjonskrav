@@ -1,14 +1,14 @@
 package no.nav.pensjon.refusjonskrav.service
 
+import no.nav.pensjon.refusjonskrav.domain.ArtType
+import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
-import no.nav.pensjon.refusjonskrav.domain.TPKredMap
-import no.nav.pensjon.refusjonskrav.repository.TPKredMapRepository
+import no.nav.pensjon.refusjonskrav.repository.KredMapRepository
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
 import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.ArtType
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.MeldingStatus
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
@@ -27,7 +27,7 @@ internal class RefusjonskravService(
     private val tpClient: TpClient,
     private val osClient: OsClient,
     private val vedtakService: VedtakService,
-    private val kredMapRepository: TPKredMapRepository
+    private val kredMapRepository: KredMapRepository
 ) {
 
     private val logger = getLogger(javaClass)
@@ -115,10 +115,11 @@ internal class RefusjonskravService(
     private fun Refusjonskrav.createAndreTrekkRequest(melding: Melding): OpprettAndreTrekkRequest {
         val prioritetFom = melding.prioritetFom
         val tpKredMap = melding.kredCodes
-        //TODO: Melding should contain TPNR, convert to TSS ekstern ID here.
+        val tssEksternId = melding.tssEksternId
+        val artType = melding.vedtak.underArt
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(melding.pid, melding.tssEksternId, prioritetFom, tpKredMap, it)
+                AndreTrekk(melding.pid, tssEksternId, prioritetFom, artType, tpKredMap, it)
             }
         )
     }
@@ -131,9 +132,8 @@ internal class RefusjonskravService(
     private val Set<Ytelse>.onlyAndresYtelser
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
 
-    private val Melding.kredCodes: TPKredMap
-        get() = kredMapRepository.findByTssEksternIdFkAndUnderArt(tssEksternId, vedtak.underArt)
-            ?: TODO("Feil ved henting av krediteringsmap")
+    private val Melding.kredCodes: KredMap
+        get() = kredMapRepository[tpNr] ?: TODO("Feil ved henting av krediteringsmap")
     private val Melding.tssEksternId
         get() = tpClient.getTssEksternId(tpNr)
 

@@ -1,13 +1,15 @@
 package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
+import no.nav.pensjon.refusjonskrav.domain.ArtType
+import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
-import no.nav.pensjon.refusjonskrav.domain.TPKredMap
+import no.nav.pensjon.refusjonskrav.domain.TrekkType
 import java.time.LocalDate
-import java.util.Date
+import java.util.*
 
 data class AndreTrekk(
     var debitorOffnr: String,
-    var trekktypeKode: String,
+    var trekktypeKode: TrekkType,
     var trekkperiodeFom: LocalDate,
     var trekkperiodeTom: LocalDate,
     var tssEksternId: String,
@@ -38,12 +40,13 @@ data class AndreTrekk(
         pid: String,
         tssEksternId: String,
         prioritetFom: LocalDate,
-        tpKredCodes: TPKredMap,
+        artType: ArtType,
+        kredMap: KredMap,
         refusjonstrekk: Refusjonstrekk
     ) : this(
         debitorOffnr = pid,
-        tssEksternId = tpKredCodes.tssEksternIdKre,
-        trekktypeKode = tpKredCodes.trekkType,
+        tssEksternId = kredMap.tssIdKre,
+        trekktypeKode = kredMap.getTrekkType(artType),
         sats = refusjonstrekk.belop.toString(),
         kreditorRef = refusjonstrekk.kravstillersRef,
         trekkperiodeFom = refusjonstrekk.datoFom.toLocalDate(),
@@ -55,7 +58,7 @@ data class AndreTrekk(
         ),
         fagomradeListe = setOf(
             Fagomrade(
-                trekkgruppeKode = tpKredCodes.trekkGruppe,
+                trekkgruppeKode = artType.trekkGruppe,
             )
         ))
 }

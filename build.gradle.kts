@@ -36,6 +36,7 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.kafka", "spring-kafka")
+    annotationProcessor("org.springframework.boot", "spring-boot-configuration-processor")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("com.ninja-squad", "springmockk", "3.1.0")
