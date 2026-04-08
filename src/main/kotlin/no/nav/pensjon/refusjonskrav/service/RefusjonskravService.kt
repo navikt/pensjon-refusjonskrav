@@ -1,6 +1,6 @@
 package no.nav.pensjon.refusjonskrav.service
 
-import no.nav.pensjon.refusjonskrav.domain.ArtType
+import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
@@ -9,6 +9,7 @@ import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
 import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.ArtTypeCode
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.MeldingStatus
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
@@ -116,10 +117,10 @@ internal class RefusjonskravService(
         val prioritetFom = melding.prioritetFom
         val tpKredMap = melding.kredCodes
         val tssEksternId = melding.tssEksternId
-        val artType = melding.vedtak.underArt
+        val underArt = melding.vedtak.underArt
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(melding.pid, tssEksternId, prioritetFom, artType, tpKredMap, it)
+                AndreTrekk(melding.pid, tssEksternId, prioritetFom, underArt, tpKredMap, it)
             }
         )
     }
@@ -137,9 +138,13 @@ internal class RefusjonskravService(
     private val Melding.tssEksternId
         get() = tpClient.getTssEksternId(tpNr)
 
-    private val Vedtak.underArt: ArtType
-        get() = if (art == ArtType.UFOREP && !dateFom.isBefore(LocalDate.of(2015, 1, 1))) ArtType.UFOREUT
-        else art
+    private val Vedtak.underArt: UnderArt
+        get() = when(art) {
+            ArtTypeCode.FAM_PL, ArtTypeCode.OPPSATT_BTO_PEN, ArtTypeCode.SAERALDER -> TODO("ArtType ikke støttet.")
+            ArtTypeCode.UFOREP -> if (!dateFom.isBefore(LocalDate.of(2015, 1, 1))) UnderArt.UFOREUT
+                else UnderArt.UFOREP
+            else -> art.underArt!!
+        }
 
 
     companion object {

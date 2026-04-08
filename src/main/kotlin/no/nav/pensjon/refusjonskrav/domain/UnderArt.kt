@@ -3,7 +3,7 @@ package no.nav.pensjon.refusjonskrav.domain
 import no.nav.pensjon.refusjonskrav.domain.TrekkGruppe.*
 import no.nav.pensjon.refusjonskrav.domain.TrekkType.*
 
-enum class ArtType(val trekkGruppe: TrekkGruppe, val trekkType: TrekkType) {
+enum class UnderArt(val trekkGruppe: TrekkGruppe, val trekkType: TrekkType) {
 
     /**
      * Arbeidsavklaringspenger
@@ -77,12 +77,6 @@ enum class ArtType(val trekkGruppe: TrekkGruppe, val trekkType: TrekkType) {
         trekkType = RPPE
     ),
 
-    /**
-     * Familiepleierytelse
-     */
-//    FAM_PL(
-//
-//    ),
     /** Omstillingstønad
      *
      */
@@ -90,12 +84,7 @@ enum class ArtType(val trekkGruppe: TrekkGruppe, val trekkType: TrekkType) {
         trekkGruppe = OMST,
         trekkType = ROME
     ),
-    /**
-     * Samordningspliktige ytelser for AFP Offentlig
-     *
-     */
-//    OPPSATT_BTO_PEN,
-//    SAERALDER,
+
     /**
      * UFOREP etter 01-01-2015.
      */

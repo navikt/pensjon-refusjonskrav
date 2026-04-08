@@ -1,6 +1,6 @@
 package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
-import no.nav.pensjon.refusjonskrav.domain.ArtType
+import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.domain.TrekkType
@@ -40,13 +40,13 @@ data class AndreTrekk(
         pid: String,
         tssEksternId: String,
         prioritetFom: LocalDate,
-        artType: ArtType,
+        underArt: UnderArt,
         kredMap: KredMap,
         refusjonstrekk: Refusjonstrekk
     ) : this(
         debitorOffnr = pid,
         tssEksternId = kredMap.tssIdKre,
-        trekktypeKode = kredMap.getTrekkType(artType),
+        trekktypeKode = kredMap.getTrekkType(underArt),
         sats = refusjonstrekk.belop.toString(),
         kreditorRef = refusjonstrekk.kravstillersRef,
         trekkperiodeFom = refusjonstrekk.datoFom.toLocalDate(),
@@ -58,7 +58,7 @@ data class AndreTrekk(
         ),
         fagomradeListe = setOf(
             Fagomrade(
-                trekkgruppeKode = artType.trekkGruppe,
+                trekkgruppeKode = underArt.trekkGruppe,
             )
         ))
 }
