@@ -40,9 +40,10 @@ internal class RefusjonskravService(
     fun behandleRefusjonskrav(refusjonskrav: Refusjonskrav, orgno: String?) {
         logger.info("Processing refusjonskrav for melding: ${refusjonskrav.samId}.")
         var melding = samClient.hentMelding(refusjonskrav.samId)
+        if (orgno != null) tpClient.validateTpnr(melding.tpNr, orgno)
 
         logger.debug("Validating refusjonskrav.")
-        if (refusjonskrav.validateFields(melding, orgno)) {
+        if (refusjonskrav.validateFields(melding)) {
             samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
 
             melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
@@ -54,10 +55,9 @@ internal class RefusjonskravService(
         }
     }
 
-    fun Refusjonskrav.validateFields(melding: Melding, orgno: String?) = when {
-        melding.pid != pid -> TODO("Avvik hvis vedtak ikke samsvarer med kravet. Feil i request.")
-        melding.tpNr != tpNr
-                || (orgno != null && tpClient.validateTpnr(melding.tpNr, orgno)) -> TODO("Avvik hvis melding ikke samsvarer med kravet. Feil i request.")
+    fun Refusjonskrav.validateFields(melding: Melding) = when {
+        pid != null && melding.pid != pid -> throw ResponseStatusException(HttpStatus.CONFLICT, "Pid i kravet samsvarerer ikke med melding.")
+        tpNr != null && melding.tpNr != tpNr -> throw ResponseStatusException(HttpStatus.CONFLICT, "Tpnr i kravet samsvarerer ikke med melding.")
         melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
             throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
 
@@ -75,23 +75,14 @@ internal class RefusjonskravService(
         }
     }
 
-    /*TODO: Consider:
-    try {
-        vedtakService.lukkVedtak(vedtak)
-        samClient.oppdaterVedtak(vedtak, BESVART)
-    } catch (_: Exception) {
-        if(vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
-            samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
-    }
-     */
     private fun avsluttBehandling(vedtak: Vedtak) {
-        if (vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
-            samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
-
-        if (vedtak.vedtakStatus == IKKE_OVERFORT_PEN)
+        try {
             vedtakService.lukkVedtak(vedtak)
-
-        samClient.oppdaterVedtak(vedtak, BESVART)
+            samClient.oppdaterVedtak(vedtak, BESVART)
+        } catch (_: Exception) {
+            if(vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
+                samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
+        }
     }
 
     private fun registrerSvar(melding: Melding, refusjonskrav: Boolean): Melding = samClient.updateMelding(
@@ -102,10 +93,14 @@ internal class RefusjonskravService(
     )
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) = when {
-        refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
-        refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom) -> TODO("Kast exception.")
-        vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true -> TODO("Kast exception.")
-        vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate()) -> TODO("Kast exception.")
+        refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom)
+            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk starter før start av vedtak.")
+        refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom)
+            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk slutter før start av vedtak.")
+        vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true
+            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk slutter etter avsluttning av vedtak.")
+        vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate())
+            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk kan ikke være frem i tid for løpende vedtak.")
         else -> true
     }
 
@@ -120,7 +115,14 @@ internal class RefusjonskravService(
         val underArt = melding.vedtak.underArt
         return OpprettAndreTrekkRequest(
             periodisertBelopListe.map {
-                AndreTrekk(melding.pid, tssEksternId, prioritetFom, underArt, tpKredMap, it)
+                AndreTrekk(
+                    pid = melding.pid,
+                    endringsKilde = tssEksternId,
+                    prioritetFom = prioritetFom,
+                    underArt = underArt,
+                    kredMap = tpKredMap,
+                    refusjonstrekk = it
+                )
             }
         )
     }
@@ -134,13 +136,15 @@ internal class RefusjonskravService(
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
 
     private val Melding.kredCodes: KredMap
-        get() = kredMapRepository[tpNr] ?: TODO("Feil ved henting av krediteringsmap")
+        get() = kredMapRepository[tpNr]
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Kreditorinformasjon for tpnr $tpNr ikke funnet.")
     private val Melding.tssEksternId
         get() = tpClient.getTssEksternId(tpNr)
 
     private val Vedtak.underArt: UnderArt
         get() = when(art) {
-            ArtTypeCode.FAM_PL, ArtTypeCode.OPPSATT_BTO_PEN, ArtTypeCode.SAERALDER -> TODO("ArtType ikke støttet.")
+            ArtTypeCode.FAM_PL, ArtTypeCode.OPPSATT_BTO_PEN, ArtTypeCode.SAERALDER
+                -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Arttype $art støtter ikke refusjonskrav.")
             ArtTypeCode.UFOREP -> if (!dateFom.isBefore(LocalDate.of(2015, 1, 1))) UnderArt.UFOREUT
                 else UnderArt.UFOREP
             else -> art.underArt!!

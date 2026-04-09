@@ -38,7 +38,7 @@ data class AndreTrekk(
 
     constructor(
         pid: String,
-        tssEksternId: String,
+        endringsKilde: String,
         prioritetFom: LocalDate,
         underArt: UnderArt,
         kredMap: KredMap,
@@ -54,7 +54,7 @@ data class AndreTrekk(
         prioritetFom = prioritetFom,
         trekkAlternativKode = KOppdragssystemCodes.LOPM,
         endringsInfo = EndringsInfo(
-            kildeId = tssEksternId
+            kildeId = endringsKilde
         ),
         fagomradeListe = setOf(
             Fagomrade(
