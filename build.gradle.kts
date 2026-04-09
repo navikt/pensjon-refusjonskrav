@@ -32,17 +32,18 @@ dependencies {
     implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
     implementation("no.nav.security", "token-validation-spring", tokensupportVersion)
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
-    implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.kafka", "spring-kafka")
     annotationProcessor("org.springframework.boot", "spring-boot-configuration-processor")
 
     testImplementation(kotlin("test-junit5"))
-    testImplementation("com.ninja-squad", "springmockk", "3.1.0")
+    testImplementation("com.ninja-squad", "springmockk", "5.0.1")
     testImplementation("no.nav.security", "mock-oauth2-server", "2.1.10")
     testImplementation("no.nav.security", "token-validation-spring-test", tokensupportVersion)
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
+    testImplementation("org.springframework.kafka", "spring-kafka-test")
+    testImplementation("org.wiremock", "wiremock-jetty12", "3.13.2")
 
 }
 

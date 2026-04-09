@@ -2,8 +2,6 @@ package no.nav.pensjon.refusjonskrav.service.rest.sam
 
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.*
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.HendelseType.REFUSJONSKRAV
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.KanalType.WEB_SERVICE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -84,12 +82,10 @@ class SamClient(
     fun opprettHendelse(fnr: String, tpnr: String) {
         try {
             logger.debug("Creating hendelse.")
-            samRestTemplate.postForObject<Unit>("/api/hendelse",
+            samRestTemplate.postForObject<Nothing?>("/api/hendelse",
                 OpprettHendelseRequest(
                     fnr = fnr,
-                    tpnr = tpnr,
-                    hendelseType = REFUSJONSKRAV,
-                    kanalType = WEB_SERVICE
+                    tpnr = tpnr
                 )
             )
         }  catch (e: RestClientException) {
@@ -101,8 +97,7 @@ class SamClient(
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
             logger.info("Updating vedtak: ${vedtak.samVedtakId}, status: $status.")
-            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
-            vedtak.vedtakStatus = status
+            samRestTemplate.patchForObject<Nothing?>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
         } catch (e: HttpStatusCodeException) {
             logger.error("Failed to update vedtak: ${vedtak.samVedtakId}.", e)
             when (e.statusCode) {

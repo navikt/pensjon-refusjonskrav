@@ -5,5 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "kredmap")
 class KredMapRepository(
-    mappings: Map<String, KredMap>
-): Map<String, KredMap> by mappings
+    private val mappings: Map<String, KredMap>
+) {
+
+    operator fun get(tpNr: String): KredMap? = mappings[tpNr]
+}

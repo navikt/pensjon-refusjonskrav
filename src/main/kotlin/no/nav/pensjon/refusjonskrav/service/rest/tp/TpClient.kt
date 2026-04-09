@@ -5,13 +5,10 @@ import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.PersonDto
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus.*
-import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
-import java.net.URI
 
 @Service
 class TpClient(
@@ -22,22 +19,7 @@ class TpClient(
 
     //TODO("Bedre endepunkt kommer i TP API v2, bruk av QUERY.")
     fun getYtelser(fnr: String, tpnr: String): Set<Ytelse> = try {
-        tpRestTemplate.exchange<PersonDto>(RequestEntity(
-            mapOf(
-                "fnr" to fnr,
-                "tpnr" to tpnr
-            ),
-            HttpMethod.GET,
-            URI("/api/finnForholdForBruker")
-        )).run {
-            if (statusCode == OK) body!!.forhold.first().ytelser
-            else {
-                logger.error("TP unavailable, response status: ${statusCode}.")
-                throw ResponseStatusException(
-                    BAD_GATEWAY
-                )
-            }
-        }
+        tpRestTemplate.getForObject<PersonDto>("/api/finnForholdForBruker?fnr=$fnr&tpnr=$tpnr").forhold.first().ytelser
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
         throw ResponseStatusException(

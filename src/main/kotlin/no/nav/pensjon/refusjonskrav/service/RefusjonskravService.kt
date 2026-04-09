@@ -19,10 +19,11 @@ import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 
-//@Service
+@Service
 internal class RefusjonskravService(
     private val samClient: SamClient,
     private val tpClient: TpClient,
@@ -55,7 +56,7 @@ internal class RefusjonskravService(
         }
     }
 
-    fun Refusjonskrav.validateFields(melding: Melding) = when {
+    private fun Refusjonskrav.validateFields(melding: Melding) = when {
         pid != null && melding.pid != pid -> throw ResponseStatusException(HttpStatus.CONFLICT, "Pid i kravet samsvarerer ikke med melding.")
         tpNr != null && melding.tpNr != tpNr -> throw ResponseStatusException(HttpStatus.CONFLICT, "Tpnr i kravet samsvarerer ikke med melding.")
         melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->

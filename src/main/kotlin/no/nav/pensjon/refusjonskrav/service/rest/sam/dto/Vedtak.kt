@@ -1,14 +1,13 @@
 package no.nav.pensjon.refusjonskrav.service.rest.sam.dto
 
-import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import java.time.LocalDate
 
-class Vedtak(
+data class Vedtak(
     val samVedtakId: Long,
     val person: String,
     val fagomrade: Fagomrade,
     val fagVedtakId: Long,
-    var vedtakStatus: VedtakStatus,
+    val vedtakStatus: VedtakStatus,
     val art: ArtTypeCode,
     val alleMeldingerBesvart: Boolean,
     val dateFom: LocalDate,

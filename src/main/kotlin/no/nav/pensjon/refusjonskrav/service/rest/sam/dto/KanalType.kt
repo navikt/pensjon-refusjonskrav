@@ -1,8 +1,8 @@
-package no.nav.pensjon.refusjonskrav.service.rest.sam.dto;
+package no.nav.pensjon.refusjonskrav.service.rest.sam.dto
 
-public enum KanalType {
-	/**
-	 * Web service
-	 */
-	WEB_SERVICE
+enum class KanalType {
+    /**
+     * Web service
+     */
+    WEB_SERVICE
 }

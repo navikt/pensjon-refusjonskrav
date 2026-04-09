@@ -1,9 +1,18 @@
-
+oppdrag:
+  scope: oppdrag
+  url: http://localhost:8080
+pen:
+  scope: pen
+  url: http://localhost:8080
 sam:
-  url: http://localhost
   scope: sam
+  url: http://localhost:8080
 tp:
-  url: http://localhost
+  scope: tp
+  url: http://localhost:8080
+vedtak:
+  samhandlersvar:
+    topic: pensjonsamhandling.sam-vedtak-samhandlersvar
 
 AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/entraID/.well-known/openid-configuration
 AZURE_APP_CLIENT_ID: refusjonskrav-test
@@ -19,3 +28,7 @@ MASKINPORTEN_ISSUER: placeholder
 server:
   error:
     include-message: always
+
+spring:
+  config:
+    import: file:src/main/resources/kredmap.yaml

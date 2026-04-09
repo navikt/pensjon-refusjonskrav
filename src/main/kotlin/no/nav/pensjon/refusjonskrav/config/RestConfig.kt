@@ -13,14 +13,13 @@ import java.time.Duration
 
 @Configuration
 @EnableJwtTokenValidation
-class RestConfig(
-    private val azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder,
-) {
+class RestConfig {
 
     @Bean
     fun samAzureM2MTokenInterceptor(
         @Value("\${sam.scope}")
-        samScope: String
+        samScope: String,
+        azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(samScope)
 
     @Bean
@@ -42,7 +41,8 @@ class RestConfig(
     @Bean
     fun tpAzureM2MTokenInterceptor(
         @Value("\${tp.scope}")
-        tpScope: String
+        tpScope: String,
+        azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(tpScope)
 
     @Bean
@@ -62,7 +62,8 @@ class RestConfig(
     @Bean
     fun penAzureM2MTokenInterceptor(
         @Value("\${pen.scope}")
-        penScope: String
+        penScope: String,
+        azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(penScope)
 
     @Bean
@@ -82,7 +83,8 @@ class RestConfig(
     @Bean
     fun osAzureM2MTokenInterceptor(
         @Value("\${oppdrag.scope}")
-        osScope: String
+        osScope: String,
+        azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(osScope)
 
     @Bean fun osRestTemplate(

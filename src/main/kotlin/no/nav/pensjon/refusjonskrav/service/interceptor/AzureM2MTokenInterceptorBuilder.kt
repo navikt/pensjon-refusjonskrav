@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class AzureM2MTokenInterceptorBuilder {
 
-    private val tokenCLient =  AzureAdTokenClientBuilder.builder().withNaisDefaults().buildMachineToMachineTokenClient()
+    private val tokenCLient = AzureAdTokenClientBuilder.builder().withNaisDefaults().buildMachineToMachineTokenClient()
 
     fun buildForScope(scope: String) = AzureM2MTokenInterceptor(scope, tokenCLient)
 }
