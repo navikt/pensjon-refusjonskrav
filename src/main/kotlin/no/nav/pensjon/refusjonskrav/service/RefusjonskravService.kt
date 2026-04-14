@@ -4,6 +4,7 @@ import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
+import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.*
 import no.nav.pensjon.refusjonskrav.repository.KredMapRepository
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
@@ -44,33 +45,35 @@ internal class RefusjonskravService(
         if (orgno != null) tpClient.validateTpnr(melding.tpNr, orgno)
 
         logger.debug("Validating refusjonskrav.")
-        if (refusjonskrav.validateFields(melding)) {
+        if (refusjonskrav.validateFields(melding))
             samClient.opprettHendelse(melding.vedtak.person, melding.tpNr)
 
-            melding = registrerSvar(melding, refusjonskrav.refusjonskrav)
-
-            refusjonskrav.opprettAndreTrekk(melding)
-
-            if (melding.vedtak.alleMeldingerBesvart)
-                avsluttBehandling(melding.vedtak)
+        melding = if (refusjonskrav.periodisertBelopListe.isNotEmpty())
+            registrerSvar(
+                melding,
+                refusjonskrav.refusjonskrav
+            )
+        else {
+            logger.info("Empty refusjonskrav, closing melding.")
+            registrerSvar(melding, false)
+            return
         }
+
+        refusjonskrav.opprettAndreTrekk(melding)
+
+        if (melding.vedtak.alleMeldingerBesvart)
+            avsluttBehandling(melding.vedtak)
     }
 
     private fun Refusjonskrav.validateFields(melding: Melding) = when {
-        pid != null && melding.pid != pid -> throw ResponseStatusException(HttpStatus.CONFLICT, "Pid i kravet samsvarerer ikke med melding.")
-        tpNr != null && melding.tpNr != tpNr -> throw ResponseStatusException(HttpStatus.CONFLICT, "Tpnr i kravet samsvarerer ikke med melding.")
+        pid != null && melding.pid != pid -> throw MismatchedPidException()
+        tpNr != null && melding.tpNr != tpNr -> throw MismatchedTpnrException()
         melding.meldingStatus == MeldingStatus.BESVART || melding.vedtak.vedtakStatus == BESVART ->
-            throw ResponseStatusException(HttpStatus.CONFLICT, "Melding besvart eller tidsfrist utløpt.")
-
-        periodisertBelopListe.isEmpty() -> {
-            logger.info("Empty refusjonskrav, closing melding.")
-            registrerSvar(melding, false)
-            false
-        }
+            throw MeldingBesvartException()
 
         else -> {
             logger.debug("Validating refusjonstrekk.")
-            periodisertBelopListe.all { refusjonstrekk ->
+            periodisertBelopListe.isNotEmpty() && periodisertBelopListe.all { refusjonstrekk ->
                 melding.validateRefusjonstrekk(refusjonstrekk)
             }
         }
@@ -80,9 +83,11 @@ internal class RefusjonskravService(
         try {
             vedtakService.lukkVedtak(vedtak)
             samClient.oppdaterVedtak(vedtak, BESVART)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger.warn("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
             if(vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
                 samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
+            throw CouldNotCloseVedtakException()
         }
     }
 
@@ -95,13 +100,13 @@ internal class RefusjonskravService(
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) = when {
         refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom)
-            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk starter før start av vedtak.")
-        refusjonstrekk.datoTom.toLocalDate().isBefore(vedtak.dateFom)
-            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk slutter før start av vedtak.")
+            -> throw TrekkStartBeforeVedtakException()
+        refusjonstrekk.datoTom.isBefore(refusjonstrekk.datoFom) //Var refusjonTrekk.datoTom før vedtak.datoFom i SAM, ville aldri slå inn med mindre trekket var baklengs.
+            -> throw TrekkEndBeforeStartException()
         vedtak.dateTom?.isBefore(refusjonstrekk.datoTom.toLocalDate()) == true
-            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk slutter etter avsluttning av vedtak.")
+            -> throw TrekkEndAfterVedtakException()
         vedtak.dateTom == null && lastDayOfNextMonth.isBefore(refusjonstrekk.datoTom.toLocalDate())
-            -> throw ResponseStatusException(HttpStatus.CONFLICT, "Refusjonstrekk kan ikke være frem i tid for løpende vedtak.")
+            -> throw FutureTrekkOnRunningVedtakException()
         else -> true
     }
 
