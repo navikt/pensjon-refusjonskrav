@@ -23,14 +23,14 @@ class PenClient(
             penRestTemplate.getForObject<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
             logger.error("PEN unavailable.", e)
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping PEN: ${e.message}", e)
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping PEN.")
         }
     }
 
     fun lukkVedtak(vedtak: Vedtak) {
         logger.info("Closing vedtak: ${vedtak.samVedtakId}")
         try {
-            penRestTemplate.postForObject<Nothing?>("/api/vedtak/${vedtak.fagVedtakId}/mottaSamhandlerSvar")
+            penRestTemplate.postForObject<Unit>("/api/vedtak/${vedtak.fagVedtakId}/mottaSamhandlerSvar")
         } catch (e: Exception) {
             logger.error("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
             throw e

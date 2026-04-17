@@ -1,6 +1,5 @@
 package no.nav.pensjon.refusjonskrav.service.rest.sam
 
-import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,29 +21,12 @@ class SamClient(
             samRestTemplate.getForEntity<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
             logger.error("SAM unavailable.", e)
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM: ${e.message}", e)
-        }
-    }
-
-    fun opprettRefusjonskrav(refusjonskrav: Refusjonskrav) {
-        ping()
-        try {
-            val response = samRestTemplate.postForEntity<OpprettRefusjonskravResponse>(
-                "/api/refusjonskrav",
-                refusjonskrav
-            ).body!!.also {
-                logger.info("Opprettet refusjonskrav ok")
-            }
-            response.exceptionType?.throwResponseStatusException(response.message)
-        } catch (e: HttpStatusCodeException) {
-            throw ResponseStatusException(e.statusCode, e.message)
-        } catch (e: RestClientException) {
-            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM.")
         }
     }
 
     fun hentMelding(samId: Long) = try {
-        samRestTemplate.getForObject<Melding>("/api/melding/$samId")
+        samRestTemplate.getForObject<Melding>("/api/melding/$samId")!!
     } catch (e: HttpStatusCodeException) {
         when (e.statusCode) {
             HttpStatus.NOT_FOUND -> {
@@ -67,7 +49,7 @@ class SamClient(
             refusjonskrav,
             datoSvart,
             status
-        ))
+        ))!!
     } catch (e: HttpStatusCodeException) {
         logger.error("Failed to update melding: ${melding.samId}.", e)
         when (e.statusCode) {
@@ -82,7 +64,7 @@ class SamClient(
     fun opprettHendelse(fnr: String, tpnr: String) {
         try {
             logger.debug("Creating hendelse.")
-            samRestTemplate.postForObject<Nothing?>("/api/hendelse",
+            samRestTemplate.postForObject<Unit>("/api/hendelse",
                 OpprettHendelseRequest(
                     fnr = fnr,
                     tpnr = tpnr
@@ -97,7 +79,7 @@ class SamClient(
     fun oppdaterVedtak(vedtak: Vedtak, status: VedtakStatus) {
         try {
             logger.info("Updating vedtak: ${vedtak.samVedtakId}, status: $status.")
-            samRestTemplate.patchForObject<Nothing?>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
+            samRestTemplate.patchForObject<Unit>("/api/vedtak/${vedtak.samVedtakId}", UpdateVedtakRequest(status))
         } catch (e: HttpStatusCodeException) {
             logger.error("Failed to update vedtak: ${vedtak.samVedtakId}.", e)
             when (e.statusCode) {

@@ -2,43 +2,34 @@ package no.nav.pensjon.refusjonskrav.config
 
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.ui.ModelMap
 import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
 import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.WebRequest
-import org.springframework.web.context.request.WebRequestInterceptor
+import org.springframework.web.servlet.HandlerInterceptor
 
 @Service
 class MaskinportenOrgnoInterceptor(
-    @Value("\${MASKINPORTEN_ISSUER}") private val maskinportenIssuer: String,
-) : WebRequestInterceptor {
+    @Value($$"${MASKINPORTEN_ISSUER}") private val maskinportenIssuer: String,
+) : HandlerInterceptor {
     private val log: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun preHandle(request: WebRequest) {
+    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         setOrgnoRequestAttribute(request.token?.jwtClaimsSet?.orgno)
-    }
-
-    override fun postHandle(
-        request: WebRequest,
-        model: ModelMap?
-    ) {
-    }
-
-    override fun afterCompletion(
-        request: WebRequest,
-        ex: Exception?
-    ) {
+        return true
     }
 
     private fun setOrgnoRequestAttribute(orgno: String?) {
-        RequestContextHolder.currentRequestAttributes().setAttribute("orgno", orgno, SCOPE_REQUEST)
+        if (orgno != null) {
+            RequestContextHolder.currentRequestAttributes().setAttribute("orgno", orgno, SCOPE_REQUEST)
+        }
     }
 
-    val WebRequest.token
+    val HttpServletRequest.token
         get() = getHeader("Authorization")?.substringAfter("Bearer ")?.asJwt
 
     val String.asJwt: SignedJWT

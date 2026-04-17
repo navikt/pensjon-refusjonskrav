@@ -1,34 +1,42 @@
 oppdrag:
   scope: oppdrag
-  url: http://localhost:8080
+  url: ${wiremock.server.baseUrl}
 pen:
   scope: pen
-  url: http://localhost:8080
+  url: ${wiremock.server.baseUrl}
 sam:
   scope: sam
-  url: http://localhost:8080
+  url: ${wiremock.server.baseUrl}
 tp:
   scope: tp
-  url: http://localhost:8080
+  url: ${wiremock.server.baseUrl}
 vedtak:
   samhandlersvar:
     topic: pensjonsamhandling.sam-vedtak-samhandlersvar
 
 AZURE_APP_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/entraID/.well-known/openid-configuration
 AZURE_APP_CLIENT_ID: refusjonskrav-test
+MASKINPORTEN_WELL_KNOWN_URL: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
+MASKINPORTEN_ISSUER: http://localhost:${mock-oauth2-server.port}/maskinporten
 
 no.nav.security.jwt:
   issuer:
     entraID:
       discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
       accepted_audience: ${AZURE_APP_CLIENT_ID}
-
-MASKINPORTEN_ISSUER: placeholder
-
-server:
-  error:
-    include-message: always
+    maskinporten:
+      discovery-url: ${MASKINPORTEN_WELL_KNOWN_URL}
+      validation:
+        optional-claims:
+          - aud
+          - sub
 
 spring:
   config:
     import: file:src/main/resources/kredmap.yaml
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  web:
+    error:
+      include-message: always

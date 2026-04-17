@@ -4,7 +4,7 @@ import com.nimbusds.jwt.JWTParser
 import jakarta.validation.Valid
 import no.nav.pensjon.refusjonskrav.config.MaskinportenValidator
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
-import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
+import no.nav.pensjon.refusjonskrav.service.RefusjonskravService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.Logger
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
     ProtectedWithClaims(issuer = "maskinporten", claimMap = ["scope=nav:pensjon/refusjonskrav"])
 )
 class RefusjonskravController(
-    private val samClient: SamClient
+    private val refusjonskravService: RefusjonskravService
 ) {
 
     private val logger : Logger = LoggerFactory.getLogger(javaClass)
@@ -30,13 +30,12 @@ class RefusjonskravController(
         @Valid @RequestBody refusjonskrav: Refusjonskrav,
         @RequestAttribute(required = false) orgno: String?
     ): ResponseEntity<Unit> {
-        logger.debug("Refusjonkrav: {}", refusjonskrav)
-        samClient.opprettRefusjonskrav(refusjonskrav)
+        refusjonskravService.behandleRefusjonskrav(refusjonskrav, orgno)
         return ResponseEntity.noContent().build()
 
     }
 
     @GetMapping("/api/ping")
-    fun ping(): ResponseEntity<Boolean> = ResponseEntity.ok().body<Boolean>(true)
+    fun ping(): ResponseEntity<Boolean> = ResponseEntity.ok().body(true)
         .also { logger.info("Ping utført") }
 }

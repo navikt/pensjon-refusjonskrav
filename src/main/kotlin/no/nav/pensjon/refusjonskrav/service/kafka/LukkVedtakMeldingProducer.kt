@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class LukkVedtakMeldingProducer(
-    @Value("\${vedtak.samhandlersvar.topic:test-topic}")
+    @Value($$"${vedtak.samhandlersvar.topic:test-topic}")
     private val topic: String,
     private val kafkaTemplate: KafkaTemplate<String, LukkVedtakMelding>
 ) {

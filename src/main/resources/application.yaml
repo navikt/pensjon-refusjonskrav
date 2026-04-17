@@ -1,6 +1,3 @@
-server:
-  error:
-    include-message: always
 no.nav.security.jwt:
   issuer:
     entraID:
@@ -8,9 +5,17 @@ no.nav.security.jwt:
       accepted_audience: ${AZURE_APP_CLIENT_ID}
     maskinporten:
       discovery-url: ${MASKINPORTEN_WELL_KNOWN_URL}
-      validation.optional-claims:
-        - aud
-        - sub
+      validation:
+        optional-claims:
+          - aud
+          - sub
+          -
 spring:
   config:
     import: classpath:kredmap.yaml
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  web:
+    error:
+      include-message: always

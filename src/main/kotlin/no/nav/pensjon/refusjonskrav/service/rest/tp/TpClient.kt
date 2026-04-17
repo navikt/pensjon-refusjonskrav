@@ -26,7 +26,7 @@ class TpClient(
                 .queryParam("fnr", fnr)
                 .queryParam("tpnr", tpnr)
                 .build().toUri().toString()
-        ).forhold.first().ytelser
+        )!!.forhold.first().ytelser
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
         throw ResponseStatusException(
@@ -35,7 +35,7 @@ class TpClient(
     }
 
     fun getTssEksternId(tpnr: String) = try {
-        tpRestTemplate.getForObject<OrdningDto>("/api/ordning?tpnr=$tpnr").tssId!!
+        tpRestTemplate.getForObject<OrdningDto>("/api/ordning?tpnr=$tpnr")!!.tssId!!
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
         throw ResponseStatusException(BAD_GATEWAY)
@@ -57,13 +57,13 @@ class TpClient(
         }
     }
 
-    private fun doValidation(tpnr: String, orgno: String) = tpRestTemplate.getForObject<Boolean>("/api/tpconfig/organisation/validate/" + tpnr + "_" + orgno)
+    private fun doValidation(tpnr: String, orgno: String) = tpRestTemplate.getForObject<Boolean>("/api/tpconfig/organisation/validate/" + tpnr + "_" + orgno)!!
 
     fun ping() {
         try {
             tpRestTemplate.getForEntity<String>("/actuator/health/readiness")
-        } catch (e: RestClientException) {
-            throw ResponseStatusException(SERVICE_UNAVAILABLE, "Failed to ping TP: ${e.message}", e)
+        } catch (_: RestClientException) {
+            throw ResponseStatusException(SERVICE_UNAVAILABLE, "Failed to ping TP.")
         }
     }
 }

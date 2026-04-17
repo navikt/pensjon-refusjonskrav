@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 
 @Service
-internal class RefusjonskravService(
+class RefusjonskravService(
     private val samClient: SamClient,
     private val tpClient: TpClient,
     private val osClient: OsClient,

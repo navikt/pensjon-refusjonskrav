@@ -1,8 +1,8 @@
 oppdrag:
-  url: http://sokos-oppdrag-proxy.prod-fss-pub.nais.io
+  url: https://sokos-oppdrag-proxy.prod-fss-pub.nais.io
   scope: api://prod-fss.okonomi.sokos-oppdrag-proxy/.default
 pen:
-  url: http://pensjon-pen.prod-fss-pub.nais.io
+  url: https://pensjon-pen.prod-fss-pub.nais.io
   scope: api://prod-fss.pensjondeployer.pensjon-pen/.default
 sam:
   url: https://sam.prod-fss-pub.nais.io

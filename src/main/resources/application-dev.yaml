@@ -1,5 +1,5 @@
 oppdrag:
-  url: http://sokos-oppdrag-proxy-q2.dev-fss-pub.nais.io
+  url: https://sokos-oppdrag-proxy-q2.dev-fss-pub.nais.io
   scope: api://dev-fss.okonomi.sokos-oppdrag-proxy-q2/.default
 pen:
   url: https://pensjon-pen-q2.dev-fss-pub.nais.io

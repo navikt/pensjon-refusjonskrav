@@ -22,7 +22,7 @@ class OsClient(
             osRestTemplate.getForObject<String>("/actuator/health/readiness")
         } catch (e: RestClientException) {
             logger.error("OS unavailable.", e)
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping OS: ${e.message}", e)
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping OS.")
         }
     }
 

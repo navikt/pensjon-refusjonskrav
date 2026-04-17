@@ -1,13 +1,15 @@
+@file:Suppress("AvoidDependencyNamedArgumentsNotation")
+
 group = "no.nav.pensjon.refusjonskrav"
 description = "pensjon-refusjonskrav"
 
 
-val tokensupportVersion = "5.0.24"
+val tokenSupportVersion = "5.0.24"
 
 plugins {
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
-    id("org.springframework.boot") version "3.5.8"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.spring") version "2.3.20"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -24,26 +26,29 @@ repositories {
 
 dependencies {
     implementation(kotlin("reflect"))
-    implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", "2.21.1")
-    implementation("tools.jackson.module", "jackson-module-kotlin", "3.1.0")
+    implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", "2.21.2")
+    implementation("tools.jackson.module", "jackson-module-kotlin", "3.1.2")
     implementation("io.micrometer", "micrometer-core", "1.13.4")
     implementation("io.micrometer", "micrometer-registry-prometheus", "1.13.4")
     implementation("net.logstash.logback", "logstash-logback-encoder", "8.0")
     implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
-    implementation("no.nav.security", "token-validation-spring", tokensupportVersion)
+    implementation("no.nav.security", "token-validation-spring", tokenSupportVersion)
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
+    implementation("org.springframework.boot", "spring-boot-starter-kafka")
+    implementation("org.springframework.boot", "spring-boot-starter-restclient")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
-    implementation("org.springframework.boot", "spring-boot-starter-web")
-    implementation("org.springframework.kafka", "spring-kafka")
+    implementation("org.springframework.boot", "spring-boot-starter-webmvc")
     annotationProcessor("org.springframework.boot", "spring-boot-configuration-processor")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("com.ninja-squad", "springmockk", "5.0.1")
     testImplementation("no.nav.security", "mock-oauth2-server", "2.1.10")
-    testImplementation("no.nav.security", "token-validation-spring-test", tokensupportVersion)
+    testImplementation("no.nav.security", "token-validation-spring-test", tokenSupportVersion)
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
-    testImplementation("org.springframework.kafka", "spring-kafka-test")
-    testImplementation("org.wiremock", "wiremock-jetty12", "3.13.2")
+    testImplementation("org.springframework.boot", "spring-boot-starter-kafka-test")
+    testImplementation("org.springframework.boot", "spring-boot-starter-webmvc-test")
+//    testImplementation("org.wiremock", "wiremock-jetty12", "3.13.2")
+    testImplementation("org.wiremock.integrations", "wiremock-spring-boot", "4.0.9")
 
 }
 

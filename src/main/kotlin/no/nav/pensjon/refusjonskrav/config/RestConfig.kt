@@ -5,7 +5,7 @@ import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.service.interceptor.RestTemplateMdcInterceptor
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
@@ -17,14 +17,14 @@ class RestConfig {
 
     @Bean
     fun samAzureM2MTokenInterceptor(
-        @Value("\${sam.scope}")
+        @Value($$"${sam.scope}")
         samScope: String,
         azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(samScope)
 
     @Bean
     fun samRestTemplate(
-        @Value("\${sam.url}")
+        @Value($$"${sam.url}")
         samUrl: String,
         samAzureM2MTokenInterceptor: AzureM2MTokenInterceptor,
         restTemplateMdcInterceptor: RestTemplateMdcInterceptor
@@ -40,14 +40,14 @@ class RestConfig {
 
     @Bean
     fun tpAzureM2MTokenInterceptor(
-        @Value("\${tp.scope}")
+        @Value($$"${tp.scope}")
         tpScope: String,
         azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(tpScope)
 
     @Bean
     fun tpRestTemplate(
-        @Value("\${tp.url}")
+        @Value($$"${tp.url}")
         tpUrl: String,
         tpAzureM2MTokenInterceptor: AzureM2MTokenInterceptor,
         restTemplateMdcInterceptor: RestTemplateMdcInterceptor
@@ -61,14 +61,14 @@ class RestConfig {
 
     @Bean
     fun penAzureM2MTokenInterceptor(
-        @Value("\${pen.scope}")
+        @Value($$"${pen.scope}")
         penScope: String,
         azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(penScope)
 
     @Bean
     fun penRestTemplate(
-        @Value("\${pen.url}")
+        @Value($$"${pen.url}")
         penUrl: String,
         penAzureM2MTokenInterceptor: AzureM2MTokenInterceptor,
         restTemplateMdcInterceptor: RestTemplateMdcInterceptor
@@ -82,13 +82,13 @@ class RestConfig {
 
     @Bean
     fun osAzureM2MTokenInterceptor(
-        @Value("\${oppdrag.scope}")
+        @Value($$"${oppdrag.scope}")
         osScope: String,
         azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
     ) = azureM2MTokenInterceptorBuilder.buildForScope(osScope)
 
     @Bean fun osRestTemplate(
-        @Value("\${oppdrag.url}")
+        @Value($$"${oppdrag.url}")
         osUrl: String,
         osAzureM2MTokenInterceptor: AzureM2MTokenInterceptor,
         restTemplateMdcInterceptor: RestTemplateMdcInterceptor

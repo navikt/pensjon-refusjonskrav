@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder.okForJson
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder.responseDefinition
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
 import io.mockk.every
@@ -13,15 +12,7 @@ import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.domain.TrekkType
 import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.CouldNotCloseVedtakException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.FutureTrekkOnRunningVedtakException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.MeldingBesvartException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.MismatchedPidException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.MismatchedTpnrException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.OrdningForbiddenException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.TrekkEndAfterVedtakException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.TrekkEndBeforeStartException
-import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.TrekkStartBeforeVedtakException
+import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.*
 import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptorBuilder
 import no.nav.pensjon.refusjonskrav.service.kafka.LukkVedtakMeldingProducer
@@ -37,28 +28,27 @@ import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.OrdningDto
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.PersonDto
 import no.nav.pensjon.refusjonskrav.service.rest.tp.dto.Ytelse
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.BeforeAll
+import org.junit.Assert.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertNotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.context.web.WebAppConfiguration
+import org.wiremock.spring.EnableWireMock
 import java.time.LocalDate
 
+@SpringBootTest
 @EmbeddedKafka
 @EnableMockOAuth2Server
-@SpringBootTest
-@WireMockTest(httpPort = 8080)
-@WebAppConfiguration
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnableWireMock
+//@WebAppConfiguration
 class RefusjonskravServiceTest {
 
     @MockkBean
+    @Suppress("Unused")
     private lateinit var azureM2MTokenInterceptorBuilder: AzureM2MTokenInterceptorBuilder
 
     @MockkBean
@@ -91,20 +81,24 @@ class RefusjonskravServiceTest {
     @Autowired
     private lateinit var refusjonskravService: RefusjonskravService
 
-    @BeforeAll
+    @BeforeEach
     fun setup() {
         every { samAzureM2MTokenInterceptor.intercept(any(), any(), any()) }.answers { it.invocation.run {
             (args[2] as ClientHttpRequestExecution).execute(args[0] as HttpRequest, args[1] as ByteArray)
         } }
+        every { samAzureM2MTokenInterceptor.andThen(any()) } answers { callOriginal() }
         every { tpAzureM2MTokenInterceptor.intercept(any(), any(), any()) }.answers { it.invocation.run {
             (args[2] as ClientHttpRequestExecution).execute(args[0] as HttpRequest, args[1] as ByteArray)
         } }
+        every { tpAzureM2MTokenInterceptor.andThen(any()) } answers { callOriginal() }
         every { penAzureM2MTokenInterceptor.intercept(any(), any(), any()) }.answers { it.invocation.run {
             (args[2] as ClientHttpRequestExecution).execute(args[0] as HttpRequest, args[1] as ByteArray)
         } }
+        every { penAzureM2MTokenInterceptor.andThen(any()) } answers { callOriginal() }
         every { osAzureM2MTokenInterceptor.intercept(any(), any(), any()) }.answers { it.invocation.run {
             (args[2] as ClientHttpRequestExecution).execute(args[0] as HttpRequest, args[1] as ByteArray)
         } }
+        every { osAzureM2MTokenInterceptor.andThen(any()) } answers { callOriginal() }
     }
 
     @Test
@@ -127,6 +121,13 @@ class RefusjonskravServiceTest {
         runTest(TestCase(
             fagomrade = Fagomrade.PEN,
             trekktype = TrekktypePattern.RPTS
+        ))
+    }
+
+    @Test
+    fun `Behandle refusjonkrav med fagomraade AAP`() {
+        runTest(TestCase(
+            fagomrade = Fagomrade.AAP
         ))
     }
 
@@ -204,7 +205,7 @@ class RefusjonskravServiceTest {
             vedtak = Vedtak(
                 samVedtakId = 1234L,
                 person = "12345678910",
-                fagomrade = Fagomrade.PEN,
+                fagomrade = testCase.fagomrade,
                 fagVedtakId = 4321L,
                 vedtakStatus = VedtakStatus.SENDT,
                 art = ArtTypeCode.ALDER,
@@ -314,7 +315,10 @@ class RefusjonskravServiceTest {
                 }
             })
         }
-        verify { penClient.lukkVedtak(updatedMelding.vedtak) }
+        when(testCase.fagomrade) {
+            Fagomrade.PEN -> verify { penClient.lukkVedtak(updatedMelding.vedtak) }
+            Fagomrade.AAP, Fagomrade.EYO -> verify { lukkVedtakMeldingProducer.lukkVedtak(updatedMelding.vedtak) }
+        }
         verify { samClient.oppdaterVedtak(updatedMelding.vedtak, if (T::class == CouldNotCloseVedtakException::class) IKKE_OVERFORT_PEN else BESVART) }
     }
 

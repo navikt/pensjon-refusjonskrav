@@ -14,8 +14,4 @@ data class Refusjonskrav(
     val refusjonskrav: Boolean,
     @field:Valid
     val periodisertBelopListe: List<Refusjonstrekk>
-) {
-    override fun toString(): String {
-        return "tpnr: $tpNr, samId: $samId, ref: $refusjonskrav"
-    }
-}
+)
