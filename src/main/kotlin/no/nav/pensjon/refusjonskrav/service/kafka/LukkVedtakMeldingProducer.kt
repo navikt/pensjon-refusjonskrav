@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 
 @Service
 class LukkVedtakMeldingProducer(
@@ -19,7 +20,7 @@ class LukkVedtakMeldingProducer(
     fun lukkVedtak(vedtak: Vedtak) {
         try {
             logger.info("Closing vedtak: ${vedtak.samVedtakId}.")
-            kafkaTemplate.send(topic, LukkVedtakMelding(vedtak)).get()
+            kafkaTemplate.send(topic, LukkVedtakMelding(vedtak)).get(5, TimeUnit.SECONDS)
         } catch (e: Exception) {
             logger.error("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
             throw e

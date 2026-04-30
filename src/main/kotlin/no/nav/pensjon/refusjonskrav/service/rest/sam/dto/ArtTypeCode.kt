@@ -26,7 +26,7 @@ enum class ArtTypeCode(val underArt: UnderArt?) {
     /**
      * Barnepensjon
      */
-    BARNEP(UnderArt.AFP),
+    BARNEP(UnderArt.BARNEP),
 
     /**
      * Krigspensjon

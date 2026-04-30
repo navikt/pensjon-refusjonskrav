@@ -26,7 +26,8 @@ class TpClient(
                 .queryParam("fnr", fnr)
                 .queryParam("tpnr", tpnr)
                 .build().toUri().toString()
-        )!!.forhold.first().ytelser
+        )!!.forhold.firstOrNull()?.ytelser
+            ?: throw ResponseStatusException(BAD_GATEWAY, "Ingen forhold funnet for person.")
     } catch (e: RestClientException) {
         logger.error("TP unavailable.", e)
         throw ResponseStatusException(

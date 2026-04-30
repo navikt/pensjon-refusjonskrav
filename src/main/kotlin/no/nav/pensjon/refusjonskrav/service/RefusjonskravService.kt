@@ -86,7 +86,11 @@ class RefusjonskravService(
         } catch (e: Exception) {
             logger.warn("Failed to close vedtak: ${vedtak.samVedtakId}.", e)
             if(vedtak.vedtakStatus != IKKE_OVERFORT_PEN)
-                samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
+                try {
+                    samClient.oppdaterVedtak(vedtak, IKKE_OVERFORT_PEN)
+                } catch (updateException: Exception) {
+                    logger.error("Failed to update vedtak status to IKKE_OVERFORT_PEN: ${vedtak.samVedtakId}.", updateException)
+                }
             throw CouldNotCloseVedtakException()
         }
     }
@@ -137,7 +141,8 @@ class RefusjonskravService(
     }
 
     private val Set<Ytelse>.prioritetFom: LocalDate
-        get() = last().innmeldtFom
+        get() = maxByOrNull { it.innmeldtFom }?.innmeldtFom
+            ?: throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Ingen ytelser funnet for tp-forhold.")
     private val Set<Ytelse>.onlyAndresYtelser
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
 
