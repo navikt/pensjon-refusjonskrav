@@ -141,7 +141,7 @@ class RefusjonskravService(
     }
 
     private val Set<Ytelse>.prioritetFom: LocalDate
-        get() = maxByOrNull { it.innmeldtFom }?.innmeldtFom
+        get() = maxOfOrNull { it.innmeldtFom }
             ?: throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Ingen ytelser funnet for tp-forhold.")
     private val Set<Ytelse>.onlyAndresYtelser
         get() = all { it.ytelseKode == "GJENLEVENDE" || it.ytelseKode == "BARN" }
