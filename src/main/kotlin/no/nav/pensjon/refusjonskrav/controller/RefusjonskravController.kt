@@ -1,6 +1,7 @@
 package no.nav.pensjon.refusjonskrav.controller
 
 import com.nimbusds.jwt.JWTParser
+import jakarta.validation.Valid
 import no.nav.pensjon.refusjonskrav.config.MaskinportenValidator
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.service.SamClient
@@ -9,6 +10,7 @@ import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,9 +25,10 @@ class RefusjonskravController(
 
     private val logger : Logger = LoggerFactory.getLogger(javaClass)
 
+    @Validated
     @PostMapping("/api/refusjonskrav")
     fun opprett(
-        @RequestBody refusjonskrav: Refusjonskrav,
+        @Valid @RequestBody refusjonskrav: Refusjonskrav,
         @RequestHeader(name = "Authorization") bearerToken: String
     ): ResponseEntity<Unit> {
         maskinportenValidator.validateTpnrAuthorization(
