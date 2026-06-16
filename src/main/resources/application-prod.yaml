@@ -1,4 +1,15 @@
+oppdrag:
+  url: https://sokos-oppdrag-proxy.prod-fss-pub.nais.io
+  scope: api://prod-fss.okonomi.sokos-oppdrag-proxy/.default
+pen:
+  url: https://pensjon-pen.prod-fss-pub.nais.io
+  scope: api://prod-fss.pensjondeployer.pensjon-pen/.default
 sam:
   url: https://sam.prod-fss-pub.nais.io
   scope: api://prod-fss.pensjonsamhandling.sam/.default
-tp.url: https://tp-api.prod-fss-pub.nais.io
+tp:
+  url: https://tp-api.prod-fss-pub.nais.io
+  scope: api://prod-fss.pensjonsamhandling.tp/.default
+vedtak:
+  samhandlersvar:
+    topic: pensjonsamhandling.sam-vedtak-samhandlersvar-p
