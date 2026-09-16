@@ -6,6 +6,7 @@ val tokensupportVersion = "5.0.24"
 
 plugins {
     kotlin("jvm") version "2.3.0"
+    kotlin("kapt") version "2.3.20"
     kotlin("plugin.spring") version "2.3.0"
     id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
@@ -40,6 +41,7 @@ dependencies {
     testImplementation("no.nav.security", "mock-oauth2-server", "2.1.10")
     testImplementation("no.nav.security", "token-validation-spring-test", tokensupportVersion)
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
+    testImplementation(kotlin("test"))
 
 }
 
@@ -47,7 +49,7 @@ kotlin {
     jvmToolchain(21)
 }
 
-tasks{
+tasks {
     test {
         useJUnitPlatform()
     }

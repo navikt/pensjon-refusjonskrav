@@ -1,6 +1,11 @@
 server:
   error:
     include-message: always
+management:
+  endpoints.web.exposure.include: prometheus, health
+  endpoint:
+    prometheus:
+      access: read_only
 no.nav.security.jwt:
   issuer:
     entraID:
