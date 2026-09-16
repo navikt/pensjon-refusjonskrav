@@ -21,6 +21,7 @@ class SamClient(
         try {
             samRestTemplate.getForEntity("/api/refusjonskrav/ping", String::class.java)
         } catch (e: RestClientException) {
+            logger.error("Failed to ping SAM", e)
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to ping SAM: ${e.message}", e)
         }
     }
@@ -37,8 +38,10 @@ class SamClient(
             }
             response.exceptionType?.throwResponseStatusException(response.message)
         } catch (e: HttpStatusCodeException) {
+            logger.warn("SAM returning error with status code ${e.statusCode}, message: ${e.message}")
             throw ResponseStatusException(e.statusCode, e.message)
         } catch (e: RestClientException) {
+            logger.error("Unexpected error from SAM", e)
             throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message)
         }
     }
