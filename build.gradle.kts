@@ -11,6 +11,7 @@ plugins {
     kotlin("plugin.spring") version "2.3.20"
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
+    kotlin("kapt") version "2.3.20"
 }
 
 repositories {
@@ -49,6 +50,7 @@ dependencies {
     testImplementation("org.springframework.boot", "spring-boot-starter-webmvc-test")
 //    testImplementation("org.wiremock", "wiremock-jetty12", "3.13.2")
     testImplementation("org.wiremock.integrations", "wiremock-spring-boot", "4.0.9")
+    testImplementation(kotlin("test"))
 
 }
 
@@ -56,7 +58,7 @@ kotlin {
     jvmToolchain(21)
 }
 
-tasks{
+tasks {
     test {
         useJUnitPlatform()
     }

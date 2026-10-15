@@ -4,6 +4,9 @@ import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.domain.TrekkType
+import no.nav.pensjon.refusjonskrav.domain.UnderArt.AAP
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.KOppdragssystemCodes.LOPM
+import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.KOppdragssystemCodes.SALD
 import java.time.LocalDate
 import java.util.*
 
@@ -52,7 +55,7 @@ data class AndreTrekk(
         trekkperiodeFom = refusjonstrekk.datoFom.toLocalDate(),
         trekkperiodeTom = refusjonstrekk.datoTom.toLocalDate(),
         prioritetFom = prioritetFom,
-        trekkAlternativKode = KOppdragssystemCodes.LOPM,
+        trekkAlternativKode = if (underArt == AAP) SALD else LOPM,
         endringsInfo = EndringsInfo(
             kildeId = endringsKilde
         ),
