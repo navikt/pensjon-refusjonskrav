@@ -1,11 +1,13 @@
 package no.nav.pensjon.refusjonskrav.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.JOSEObjectType
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
+import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravExceptions.ELEMENT_FINNES_IKKE
 import no.nav.pensjon.refusjonskrav.service.OpprettRefusjonskravResponse
@@ -25,7 +27,10 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
+import kotlin.test.assertEquals
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableMockOAuth2Server
@@ -36,6 +41,9 @@ internal class RefusjonskravControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
     protected lateinit var server: MockOAuth2Server
 
     @MockkBean
@@ -43,6 +51,39 @@ internal class RefusjonskravControllerTest {
 
     @MockkBean
     private lateinit var samRestTemplate: RestTemplate
+
+    @Test
+    fun `JSON preserves request fields and serializes period dates as epoch milliseconds`() {
+        val input = """
+            {
+                "pid": "12345678901",
+                "tpNr": "3010",
+                "samId": 1234,
+                "refusjonskrav": true,
+                "periodisertBelopListe": [{
+                    "belop": 1234.5,
+                    "kravstillersRef": "ref-1",
+                    "datoFom": "2026-01-01T00:00:00.000",
+                    "datoTom": "2026-01-31T23:59:59.000"
+                }]
+            }
+        """.trimIndent()
+        val fom = LocalDateTime.of(2026, 1, 1, 0, 0)
+        val tom = LocalDateTime.of(2026, 1, 31, 23, 59, 59)
+        val expected = Refusjonskrav(
+            "12345678901", "3010", 1234L, true,
+            listOf(Refusjonstrekk(1234.5, "ref-1", fom, tom))
+        )
+
+        val decoded = objectMapper.readValue(input, Refusjonskrav::class.java)
+
+        assertEquals(expected, decoded)
+        val expectedJson = objectMapper.readTree(input)
+        val period = expectedJson["periodisertBelopListe"][0] as ObjectNode
+        period.put("datoFom", fom.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        period.put("datoTom", tom.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertEquals(expectedJson, objectMapper.readTree(objectMapper.writeValueAsString(decoded)))
+    }
 
     @Test
     fun `valid request response is 201 No Content`() {
