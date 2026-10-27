@@ -31,7 +31,7 @@ dependencies {
     implementation("tools.jackson.module", "jackson-module-kotlin", "3.1.2")
     implementation("io.micrometer", "micrometer-core", "1.13.4")
     implementation("io.micrometer", "micrometer-registry-prometheus", "1.13.4")
-    implementation("net.logstash.logback", "logstash-logback-encoder", "8.0")
+    implementation("net.logstash.logback", "logstash-logback-encoder", "9.0")
     implementation("no.nav.common", "token-client", "3.2024.09.16_11.09-578823a87a2f")
     implementation("no.nav.security", "token-validation-spring", tokenSupportVersion)
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
