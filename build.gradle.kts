@@ -8,9 +8,11 @@ plugins {
     kotlin("jvm") version "2.3.0"
     kotlin("kapt") version "2.3.20"
     kotlin("plugin.spring") version "2.3.0"
-    id("org.springframework.boot") version "3.5.8"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
 }
+
+extra["jackson-bom.version"] = "2.21.8"
 
 repositories {
     mavenCentral()
@@ -25,8 +27,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("reflect"))
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
-    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.17.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin")
     implementation("io.micrometer", "micrometer-core", "1.13.4")
     implementation("io.micrometer", "micrometer-registry-prometheus", "1.13.4")
     implementation("net.logstash.logback", "logstash-logback-encoder", "8.0")
