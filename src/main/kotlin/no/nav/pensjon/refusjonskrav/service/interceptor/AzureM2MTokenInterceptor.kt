@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AzureM2MTokenInterceptor(
-    @Value("\${sam.scope}")
+    @param:Value("\${sam.scope}")
     private val samScope: String
     ): ClientHttpRequestInterceptor {
 
