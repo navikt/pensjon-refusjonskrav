@@ -31,3 +31,5 @@ management:
   endpoint:
     prometheus:
       access: read_only
+
+NAIS_TOKEN_ENDPOINT: http://localhost:8089
