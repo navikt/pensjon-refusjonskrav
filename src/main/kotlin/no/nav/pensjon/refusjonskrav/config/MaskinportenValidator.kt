@@ -4,7 +4,7 @@ import com.nimbusds.jwt.JWT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpStatus.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
@@ -14,11 +14,11 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class MaskinportenValidator(
-    @Value("\${MASKINPORTEN_ISSUER}") private val maskinportenIssuer: String,
-    @Value("\${tp.url}") tpUrl: String
+    @param:Value("\${MASKINPORTEN_ISSUER}") private val maskinportenIssuer: String,
+    @Value($$"${tp.url}") tpUrl: String
 ) {
 
-    private val restTemplate = RestTemplateBuilder().rootUri(tpUrl).build()
+    private val restTemplate = RestTemplateBuilder().baseUri(tpUrl).build()
     private val log: Logger = LoggerFactory.getLogger(javaClass)
 
     fun validateTpnrAuthorization(tpnr: String, token: JWT) {

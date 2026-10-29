@@ -13,9 +13,23 @@ no.nav.security.jwt:
     entraID:
       discovery-url: ${AZURE_APP_WELL_KNOWN_URL}
       accepted_audience: ${AZURE_APP_CLIENT_ID}
+    maskinporten:
+      discovery-url: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
+      validation.optional-claims:
+        - aud
+        - sub
 
-MASKINPORTEN_ISSUER: placeholder
+MASKINPORTEN_ISSUER: http://localhost:${mock-oauth2-server.port}/maskinporten
 
-server:
-  error:
-    include-message: always
+spring:
+  web:
+    error:
+      include-message: always
+
+management:
+  endpoints.web.exposure.include: prometheus, health
+  endpoint:
+    prometheus:
+      access: read_only
+
+NAIS_TOKEN_ENDPOINT: http://localhost:8089
