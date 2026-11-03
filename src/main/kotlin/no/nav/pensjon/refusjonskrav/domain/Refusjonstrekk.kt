@@ -12,9 +12,9 @@ data class Refusjonstrekk(
     var belop: Double,
     @field:Size(max = 12, message = "kravstillersRef cannot exceed 12 characters.")
     val kravstillersRef: String,
-    @JsonSetter
+    @param:JsonSetter
     val datoFom: LocalDateTime,
-    @JsonSetter
+    @param:JsonSetter
     val datoTom: LocalDateTime,
 ) {
     @JsonGetter("datoFom")

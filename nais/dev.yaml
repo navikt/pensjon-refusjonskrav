@@ -20,6 +20,8 @@ spec:
   azure:
     application:
       enabled: true
+    sidecar:
+      enabled: true
   maskinporten:
     enabled: true
     scopes:

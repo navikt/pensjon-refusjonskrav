@@ -4,7 +4,7 @@ import no.nav.pensjon.refusjonskrav.service.interceptor.AzureM2MTokenInterceptor
 import no.nav.pensjon.refusjonskrav.service.interceptor.RestTemplateMdcInterceptor
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
@@ -13,7 +13,7 @@ import java.time.Duration
 @Configuration
 @EnableJwtTokenValidation
 class RestConfig(
-    @Value("\${sam.url}")
+    @param:Value($$"${sam.url}")
     private val samUrl: String,
     private val azureM2MTokenInterceptor: AzureM2MTokenInterceptor,
     private val restTemplateMdcInterceptor: RestTemplateMdcInterceptor
@@ -21,7 +21,7 @@ class RestConfig(
 
     @Bean
     fun samRestTemplate(): RestTemplate = RestTemplateBuilder()
-        .rootUri(samUrl)
+        .baseUri(samUrl)
         .additionalInterceptors(
             azureM2MTokenInterceptor,
             restTemplateMdcInterceptor)
