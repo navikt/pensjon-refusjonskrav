@@ -58,6 +58,8 @@ spec:
               orgno: "940415683"
             - name: Garantikassen for fiskere
               orgno: "974652382"
+            - name: Aksio
+              orgnr: "927613298"
   liveness:
     path: actuator/health/liveness
     initialDelay: 45
