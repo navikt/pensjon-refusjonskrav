@@ -1,0 +1,12 @@
+kredmap:
+  mappings:
+    "9001":
+      tssIdKre: "90000000001"
+    "9002":
+      tssIdKre: "90000000002"
+      trekkTyper:
+        ALDER: RS30
+    "9003":
+      tssIdKre: "90000000003"
+      trekkTyper:
+        ALDER: RPTS

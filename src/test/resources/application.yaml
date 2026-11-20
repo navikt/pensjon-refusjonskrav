@@ -33,7 +33,7 @@ no.nav.security.jwt:
 
 spring:
   config:
-    import: file:src/main/resources/kredmap.yaml
+    import: classpath:kredmap-test.yaml
   kafka:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

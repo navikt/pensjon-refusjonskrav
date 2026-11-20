@@ -408,12 +408,12 @@ class RefusjonskravServiceTest {
 
     companion object {
         private const val CORRECT_ORGNO = "12345678"
-        private const val CORRECT_TSS_ID = "80000434937"
-        private const val DEFAULT_TPNR = "3110"
-        private const val DEFAULT_TSS_ID = "80000434937"
-        private const val RS_TPNR = "3010"
-        private const val RS_TSS_ID = "80000435771"
-        private const val RPTS_TPNR = "3100"
-        private const val RPTS_TSS_ID = "80000427899"
+        private const val CORRECT_TSS_ID = "90000000001"
+        private const val DEFAULT_TPNR = "9001"
+        private const val DEFAULT_TSS_ID = "90000000001"
+        private const val RS_TPNR = "9002"
+        private const val RS_TSS_ID = "90000000002"
+        private const val RPTS_TPNR = "9003"
+        private const val RPTS_TSS_ID = "90000000003"
     }
 }
