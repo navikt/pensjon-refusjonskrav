@@ -1,19 +1,16 @@
 package no.nav.pensjon.refusjonskrav.service
 
-import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonskrav
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
+import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.exception.RefusjonskravErrorResponseException.*
 import no.nav.pensjon.refusjonskrav.repository.KredMapRepository
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.OsClient
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.AndreTrekk
 import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.OpprettAndreTrekkRequest
 import no.nav.pensjon.refusjonskrav.service.rest.sam.SamClient
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.ArtTypeCode
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Melding
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.MeldingStatus
-import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.Vedtak
+import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.*
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.BESVART
 import no.nav.pensjon.refusjonskrav.service.rest.sam.dto.VedtakStatus.IKKE_OVERFORT_PEN
 import no.nav.pensjon.refusjonskrav.service.rest.tp.TpClient
@@ -103,7 +100,7 @@ class RefusjonskravService(
     )
 
     private fun Melding.validateRefusjonstrekk(refusjonstrekk: Refusjonstrekk) = when {
-        refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom)
+        refusjonstrekk.datoFom.toLocalDate().isBefore(vedtak.dateFom) && vedtak.fagomrade != Fagomrade.AAP
             -> throw TrekkStartBeforeVedtakException()
         refusjonstrekk.datoTom.isBefore(refusjonstrekk.datoFom) //Var refusjonTrekk.datoTom før vedtak.datoFom i SAM, ville aldri slå inn med mindre trekket var baklengs.
             -> throw TrekkEndBeforeStartException()
