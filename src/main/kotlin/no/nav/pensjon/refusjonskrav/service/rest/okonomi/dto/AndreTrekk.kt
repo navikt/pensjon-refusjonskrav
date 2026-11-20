@@ -1,12 +1,9 @@
 package no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto
 
-import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import no.nav.pensjon.refusjonskrav.domain.KredMap
 import no.nav.pensjon.refusjonskrav.domain.Refusjonstrekk
 import no.nav.pensjon.refusjonskrav.domain.TrekkType
-import no.nav.pensjon.refusjonskrav.domain.UnderArt.AAP
-import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.KOppdragssystemCodes.LOPM
-import no.nav.pensjon.refusjonskrav.service.rest.okonomi.dto.KOppdragssystemCodes.SALD
+import no.nav.pensjon.refusjonskrav.domain.UnderArt
 import java.time.LocalDate
 import java.util.*
 
@@ -55,7 +52,7 @@ data class AndreTrekk(
         trekkperiodeFom = refusjonstrekk.datoFom.toLocalDate(),
         trekkperiodeTom = refusjonstrekk.datoTom.toLocalDate(),
         prioritetFom = prioritetFom,
-        trekkAlternativKode = if (underArt == AAP) SALD else LOPM,
+        trekkAlternativKode = KOppdragssystemCodes.LOPM,
         endringsInfo = EndringsInfo(
             kildeId = endringsKilde
         ),

@@ -10,6 +10,5 @@ enum class KOppdragssystemCodes {
     REFK,
 
     /** OS Code, LOPM.  */
-    LOPM,
-    SALD;
+    LOPM;
 }
